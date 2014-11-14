@@ -42,7 +42,10 @@ define(function (require, exports) {
     // override onAdded to call setInlineWidgetHeight
     SnippetWidget.prototype.onAdded = function () {
         this.parentClass.onAdded.call(this);
-        this.hostEditor.setInlineWidgetHeight(this, this.height);
+        // make sure the height is being animated
+        this.hostEditor.setInlineWidgetHeight(this, this.height, true);
+        // add focus to search input
+        this.$htmlContent.find(".snippet-search-input").focus();
     };
 
     function triggerWidget() {
