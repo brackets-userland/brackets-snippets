@@ -5,14 +5,14 @@ define(function (require, exports, module) {
         ExtensionUtils  = brackets.getModule("utils/ExtensionUtils");
 
     // Local modules
-    var Strings = require("strings");
+    var SnippetWidget = require("src/SnippetWidget");
 
-    // Load style sheet
-    ExtensionUtils.loadStyleSheet(module, "styles/main.less");
-
-	// Extension initialisation
+    // Extension initialisation
     AppInit.appReady(function () {
-        console.log("Hi World!");
+        // Load the style sheet
+        ExtensionUtils.loadStyleSheet(module, "styles/main.less");
+        // Init the extension modules
+        SnippetWidget.init();
     });
 
 });
