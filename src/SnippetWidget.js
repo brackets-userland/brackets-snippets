@@ -2,14 +2,53 @@ define(function (require, exports) {
     "use strict";
 
     // Brackets modules
-    var CommandManager = brackets.getModule("command/CommandManager"),
-        KeyBindingManager = brackets.getModule("command/KeyBindingManager");
+    var CommandManager    = brackets.getModule("command/CommandManager"),
+        EditorManager     = brackets.getModule("editor/EditorManager"),
+        KeyBindingManager = brackets.getModule("command/KeyBindingManager"),
+        InlineWidget      = brackets.getModule("editor/InlineWidget").InlineWidget;
 
     // Local modules
     var Preferences = require("src/Preferences");
 
+    // Constants
+    var WIDGET_HEIGHT = 100;
+
+    // Templates
+    var snippetWidgetTemplate = require("text!templates/SnippetWidget.html");
+
+    /**
+     * @constructor
+     * @extends {InlineWidget}
+     */
+    function SnippetWidget(hostEditor) {
+        InlineWidget.call(this);
+        this.load(hostEditor);
+    }
+    SnippetWidget.prototype = Object.create(InlineWidget.prototype);
+    SnippetWidget.prototype.constructor = SnippetWidget;
+    SnippetWidget.prototype.parentClass = InlineWidget.prototype;
+
+    // default height for the widget
+    SnippetWidget.prototype.height = WIDGET_HEIGHT;
+
+    // generate html for the widget
+    SnippetWidget.prototype.load = function (hostEditor) {
+        this.parentClass.load.call(this, hostEditor);
+        this.$htmlContent.append(Mustache.render(snippetWidgetTemplate, {
+            title: "hello snippet"
+        }));
+    };
+
+    // override onAdded to call setInlineWidgetHeight
+    SnippetWidget.prototype.onAdded = function () {
+        this.parentClass.onAdded.call(this);
+        this.hostEditor.setInlineWidgetHeight(this, this.height);
+    };
+
     function triggerWidget() {
-        console.log("Hello!");
+        var activeEditor = EditorManager.getActiveEditor(),
+            sWidget = new SnippetWidget(activeEditor);
+        activeEditor.addInlineWidget(activeEditor.getCursorPos(), sWidget, true);
     }
 
     function bindShortcut() {
