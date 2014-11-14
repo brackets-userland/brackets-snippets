@@ -51,17 +51,41 @@ define(function (require, exports) {
         // make sure the height is being animated
         this.hostEditor.setInlineWidgetHeight(this, this.height, true);
         // add focus to search input
-        this.$searchInput.on("focus change keyup", function () {
-            self.refreshSnippets();
-        }).focus();
+        this.$searchInput
+            .on("keydown", function (e) {
+                // move between snippets with arrows
+                if (e.which === 38 || e.which === 40) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    if (e.which === 38) {
+                        self.selectPrevSnippet();
+                    } else {
+                        self.selectNextSnippet();
+                    }
+                }
+            })
+            .on("focus change keyup", function () {
+                self.refreshSnippets();
+            }).focus();
     };
 
     SnippetWidget.prototype.refreshSnippets = function () {
         var query = this.$searchInput.val();
-        var snippets = Snippets.search(query);
-        this.$snippetsList.html(Mustache.render(snippetWidgetListTemplate, {
-            snippets: snippets
-        }));
+        if (query !== this.lastQuery || typeof this.lastQuery !== "string") {
+            this.lastQuery = query;
+            this.snippets = Snippets.search(query);
+            this.$snippetsList.html(Mustache.render(snippetWidgetListTemplate, {
+                snippets: this.snippets
+            }));
+        }
+    };
+
+    SnippetWidget.prototype.selectPrevSnippet = function () {
+        // TODO:
+    };
+
+    SnippetWidget.prototype.selectNextSnippet = function () {
+        // TODO:
     };
 
     function triggerWidget() {

@@ -9,6 +9,7 @@ define(function (require, exports) {
         return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
     }
 
+    // TODO: every snippets needs to have an unique generated ID
     var SnippetCollection = [
         {
             name: "1st sample snippet",
