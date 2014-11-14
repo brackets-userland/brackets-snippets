@@ -1,7 +1,29 @@
+@borderColor: #b2b5b5;
+@white: #ffffff;
+
 .brackets-snippets-widget {
     position: absolute;
     left: 40px;
     right: 10px;
     top: 10px;
     bottom: 10px;
+
+    .left-column {
+        float: left;
+
+        .snippets-list {
+            border: 1px solid @borderColor;
+            max-height: 80px;
+            overflow-x: hidden;
+            overflow-y: scroll;
+
+            .dark & {
+                border: 1px solid @white;
+            }
+
+            .snippet-entry {
+                background-color: @white;
+            }
+        }
+    }
 }

@@ -8,13 +8,15 @@ define(function (require, exports) {
         InlineWidget      = brackets.getModule("editor/InlineWidget").InlineWidget;
 
     // Local modules
-    var Preferences = require("src/Preferences");
+    var Preferences = require("src/Preferences"),
+        Snippets    = require("src/Snippets");
 
     // Constants
     var WIDGET_HEIGHT = 100;
 
     // Templates
-    var snippetWidgetTemplate = require("text!templates/SnippetWidget.html");
+    var snippetWidgetTemplate     = require("text!templates/SnippetWidget.html"),
+        snippetWidgetListTemplate = require("text!templates/SnippetWidgetList.html");
 
     /**
      * @constructor
@@ -37,15 +39,29 @@ define(function (require, exports) {
         this.$htmlContent.append(Mustache.render(snippetWidgetTemplate, {
             title: "hello snippet"
         }));
+        // save elements so we don't have to search for them later
+        this.$searchInput = this.$htmlContent.find(".snippet-search-input");
+        this.$snippetsList = this.$htmlContent.find(".snippets-list");
     };
 
     // override onAdded to call setInlineWidgetHeight
     SnippetWidget.prototype.onAdded = function () {
+        var self = this;
         this.parentClass.onAdded.call(this);
         // make sure the height is being animated
         this.hostEditor.setInlineWidgetHeight(this, this.height, true);
         // add focus to search input
-        this.$htmlContent.find(".snippet-search-input").focus();
+        this.$searchInput.on("focus change keyup", function () {
+            self.refreshSnippets();
+        }).focus();
+    };
+
+    SnippetWidget.prototype.refreshSnippets = function () {
+        var query = this.$searchInput.val();
+        var snippets = Snippets.search(query);
+        this.$snippetsList.html(Mustache.render(snippetWidgetListTemplate, {
+            snippets: snippets
+        }));
     };
 
     function triggerWidget() {
