@@ -1,0 +1,48 @@
+{
+    "name": "zaggino.brackets-snippets",
+
+    "title": "Brackets Snippets (by zaggino)",
+    "description": "Snippets extension for Brackets",
+    "keywords": ["snipepts"],
+    "version": "0.0.1",
+
+    "license": "MIT",
+    "homepage": "https://github.com/zaggino/brackets-snippets",
+    "author": {
+        "name": "Martin Zagora",
+        "email": "zaggino@gmail.com",
+        "url": "https://github.com/zaggino"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/zaggino/brackets-snippets.git"
+    },
+    "bugs": {
+        "url": "https://github.com/zaggino/brackets-snippets/issues",
+        "email": "zaggino@gmail.com"
+    },
+
+    "engines": {
+        "brackets": ">=0.44.0"
+    },
+    "scripts": {
+        "test": "grunt test"
+    },
+    "dependencies": {
+
+    },
+    "devDependencies": {
+        "grunt": "latest",
+        "grunt-contrib-jshint": "latest",
+        "grunt-jslint": "latest",
+        "grunt-lesslint": "latest",
+        "grunt-jscs-checker": "latest",
+        "grunt-contrib-compress": "latest",
+        "grunt-lineending": "latest"
+    },
+
+    "i18n": ["en"],
+    "package-i18n": {
+
+    }
+}
