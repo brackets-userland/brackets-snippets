@@ -9,21 +9,34 @@ define(function (require, exports) {
         return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
     }
 
-    // TODO: every snippets needs to have an unique generated ID
-    var SnippetCollection = [
-        {
-            name: "1st sample snippet",
-            template: "This is what will be instered at current position (1)"
-        },
-        {
-            name: "2nd sample snippet",
-            template: "This is what will be instered at current position (2)"
-        },
-        {
-            name: "3rd sample snippet",
-            template: "This is what will be instered at current position (3)"
-        }
-    ];
+    var SnippetCollection = [],
+        lastSnippetId = 0;
+
+    function loadSnippets() {
+        var source = [
+            {
+                name: "1st sample snippet",
+                template: "This is what will be instered at current position (1)"
+            },
+            {
+                name: "2nd sample snippet",
+                template: "This is what will be instered at current position (2)"
+            },
+            {
+                name: "3rd sample snippet",
+                template: "This is what will be instered at current position (3)"
+            }
+        ];
+        _.each(source, function (snippet) {
+            // every snippets needs to have an unique generated ID
+            snippet._id = ++lastSnippetId;
+            SnippetCollection.push(snippet);
+        });
+    }
+
+    function init() {
+        loadSnippets();
+    }
 
     function getAll() {
         return SnippetCollection;
@@ -39,6 +52,7 @@ define(function (require, exports) {
         });
     }
 
+    exports.init   = init;
     exports.getAll = getAll;
     exports.search = search;
 

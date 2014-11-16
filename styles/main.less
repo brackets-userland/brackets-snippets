@@ -1,5 +1,6 @@
 @borderColor: #b2b5b5;
 @white: #ffffff;
+@selectedEntry: #e0f0fa;
 
 .brackets-snippets-widget {
     position: absolute;
@@ -23,6 +24,9 @@
 
             .snippet-entry {
                 background-color: @white;
+                &.selected {
+                    background-color: @selectedEntry;
+                }
             }
         }
     }

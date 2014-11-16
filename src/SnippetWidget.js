@@ -2,7 +2,8 @@ define(function (require, exports) {
     "use strict";
 
     // Brackets modules
-    var CommandManager    = brackets.getModule("command/CommandManager"),
+    var _                 = brackets.getModule("thirdparty/lodash"),
+        CommandManager    = brackets.getModule("command/CommandManager"),
         EditorManager     = brackets.getModule("editor/EditorManager"),
         KeyBindingManager = brackets.getModule("command/KeyBindingManager"),
         InlineWidget      = brackets.getModule("editor/InlineWidget").InlineWidget;
@@ -77,15 +78,56 @@ define(function (require, exports) {
             this.$snippetsList.html(Mustache.render(snippetWidgetListTemplate, {
                 snippets: this.snippets
             }));
+            this.selectSnippet();
         }
     };
 
+    SnippetWidget.prototype.selectSnippet = function (snippet) {
+        if (snippet) {
+            // if a snippet was passed, explicitly set this snippet as selected
+            this.selectedSnippetId = snippet._id;
+        } else if (this.selectedSnippetId) {
+            // if a snippet was previously selected try to find this snippet between current snippets
+            var s = _.find(this.snippets, function (s) { return s._id === this.selectedSnippetId; }, this);
+            // if not found, just select first one available
+            if (!s) { this.selectedSnippetId = this.snippets.length > 0 ? this.snippets[0]._id : null; }
+        } else {
+            // no snippet was passed explicitly and no snippet was previously selected, select fist one
+            this.selectedSnippetId = this.snippets.length > 0 ? this.snippets[0]._id : null;
+        }
+
+        if (!this.selectedSnippetId && this.snippets.length > 0) {
+            throw new Error("[brackets-snippets] No snippet selected!");
+        }
+
+        this.$snippetsList.find(".selected").removeClass("selected");
+        this.$snippetsList.find("[x-snippet-id='" + this.selectedSnippetId + "']").addClass("selected");
+    };
+
     SnippetWidget.prototype.selectPrevSnippet = function () {
-        // TODO:
+        var prevSnippet = null;
+        for (var i = 0; i < this.snippets.length; i++) {
+            if (this.snippets[i]._id === this.selectedSnippetId) {
+                prevSnippet = this.snippets[i - 1];
+                break;
+            }
+        }
+        if (prevSnippet) {
+            this.selectSnippet(prevSnippet);
+        }
     };
 
     SnippetWidget.prototype.selectNextSnippet = function () {
-        // TODO:
+        var nextSnippet = null;
+        for (var i = 0; i < this.snippets.length; i++) {
+            if (this.snippets[i]._id === this.selectedSnippetId) {
+                nextSnippet = this.snippets[i + 1];
+                break;
+            }
+        }
+        if (nextSnippet) {
+            this.selectSnippet(nextSnippet);
+        }
     };
 
     function triggerWidget() {

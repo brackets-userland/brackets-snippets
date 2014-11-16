@@ -5,7 +5,8 @@ define(function (require, exports, module) {
         ExtensionUtils  = brackets.getModule("utils/ExtensionUtils");
 
     // Local modules
-    var SnippetWidget = require("src/SnippetWidget");
+    var SnippetWidget = require("src/SnippetWidget"),
+        Snippets      = require("src/Snippets");
 
     // Extension initialisation
     AppInit.appReady(function () {
@@ -13,6 +14,7 @@ define(function (require, exports, module) {
         ExtensionUtils.loadStyleSheet(module, "styles/main.less");
         // Init the extension modules
         SnippetWidget.init();
+        Snippets.init();
     });
 
 });
