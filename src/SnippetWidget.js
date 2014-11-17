@@ -83,13 +83,17 @@ define(function (require, exports) {
         }).focus();
 
         // add events to snippet list
-        this.$snippetsList.on("click", ".snippet-entry", function () {
-            var snippetId = parseInt($(this).attr("x-snippet-id"), 10),
-                s = _.find(self.snippets, function (s) { return s._id === snippetId; });
-            if (s) {
-                self.selectSnippet(s);
-            }
-        });
+        this.$snippetsList
+            .on("click", ".snippet-entry", function () {
+                var snippetId = parseInt($(this).attr("x-snippet-id"), 10),
+                    s = _.find(self.snippets, function (s) { return s._id === snippetId; });
+                if (s) {
+                    self.selectSnippet(s);
+                }
+            })
+            .on("dblclick", ".snippet-entry", function () {
+                self.insertSnippet();
+            });
 
         // add event for new snippet
         this.$htmlContent.find(".new-snippet").on("click", function () {
