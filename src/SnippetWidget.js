@@ -159,19 +159,20 @@ define(function (require, exports) {
     };
 
     SnippetWidget.prototype.insertSnippet = function () {
-        var textToInsert  = this.selectedSnippet.template + "\n",
-            positionStart = {
-                line: this.originalCursorPosition.line,
-                ch: 0
-            },
-            positionEnd = {
-                line: this.originalCursorPosition.line,
-                ch: 999
-            };
+        var doc           = this.hostEditor.document,
+            textToInsert  = this.selectedSnippet.template,
+            origLine      = this.originalCursorPosition.line,
+            positionStart = { line: origLine, ch: 0 },
+            positionEnd   = { line: origLine, ch: 999 };
 
-        var currentLine     = this.hostEditor.document.getRange(positionStart, positionEnd),
+        var currentLine     = doc.getRange(positionStart, positionEnd),
+            nextLine        = doc.getRange(
+                { line: origLine + 1, ch: 0 },
+                { line: origLine + 1, ch: 999 }
+            ),
             indent          = "",
-            lineBreakBefore = false;
+            lineBreakBefore = false,
+            lineBreakAfter  = false;
 
         // if line is not empty
         if (currentLine.match(/\S/)) {
@@ -181,6 +182,12 @@ define(function (require, exports) {
         } else {
             var i = this.originalCursorPosition.ch;
             while (i--) { indent += " "; }
+        }
+
+        // check if we need to insert a new line after the snippet
+        if (nextLine.match(/\S/)) {
+            lineBreakAfter = true;
+            textToInsert += "\n";
         }
 
         // indent all lines of the snippet with current indentation
@@ -193,16 +200,17 @@ define(function (require, exports) {
         if (lineBreakBefore) {
             textToInsert = "\n" + textToInsert;
             lines.length += 1;
-            this.hostEditor.document.replaceRange(textToInsert, positionEnd);
+            doc.replaceRange(textToInsert, positionEnd);
         } else {
-            this.hostEditor.document.replaceRange(textToInsert, positionStart);
+            doc.replaceRange(textToInsert, positionStart);
         }
 
         // close the widget
         this.close();
 
         // fix cursor position only after close has been called
-        this.hostEditor.setCursorPos(this.originalCursorPosition.line + lines.length - 1, this.originalCursorPosition.ch);
+        var p = origLine + lines.length;
+        this.hostEditor.setCursorPos(lineBreakAfter ? p - 1 : p, this.originalCursorPosition.ch);
     };
 
     function triggerWidget() {
