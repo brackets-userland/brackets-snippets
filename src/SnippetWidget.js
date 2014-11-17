@@ -23,9 +23,10 @@ define(function (require, exports) {
      * @constructor
      * @extends {InlineWidget}
      */
-    function SnippetWidget(hostEditor) {
+    function SnippetWidget(hostEditor, cursorPosition) {
         InlineWidget.call(this);
         this.load(hostEditor);
+        this.originalCursorPosition = cursorPosition;
     }
     SnippetWidget.prototype = Object.create(InlineWidget.prototype);
     SnippetWidget.prototype.constructor = SnippetWidget;
@@ -158,12 +159,32 @@ define(function (require, exports) {
     };
 
     SnippetWidget.prototype.insertSnippet = function () {
-        // TODO:
+        var textToInsert  = this.selectedSnippet.template + "\n",
+            positionStart = {
+                line: this.originalCursorPosition.line,
+                ch: 0
+            };
+
+        // indent all lines of the snippet with current indentation
+        var indent = this.originalCursorPosition.ch,
+            lines = textToInsert.split("\n");
+        textToInsert = lines.map(function (line) {
+            var i = indent;
+            while (i--) { line = " " + line; }
+            return line;
+        }).join("\n");
+
+        // insert the text itself
+        this.hostEditor.document.replaceRange(textToInsert, positionStart);
+        // close the widget
+        this.close();
+        // fix cursor position only after close has been called
+        this.hostEditor.setCursorPos(this.originalCursorPosition.line + lines.length - 1, this.originalCursorPosition.ch);
     };
 
     function triggerWidget() {
         var activeEditor = EditorManager.getActiveEditor(),
-            sWidget = new SnippetWidget(activeEditor);
+            sWidget      = new SnippetWidget(activeEditor, activeEditor.getCursorPos());
         activeEditor.addInlineWidget(activeEditor.getCursorPos(), sWidget, true);
     }
 
