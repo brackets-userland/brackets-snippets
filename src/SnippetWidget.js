@@ -13,7 +13,7 @@ define(function (require, exports) {
         Snippets    = require("src/Snippets");
 
     // Constants
-    var WIDGET_HEIGHT = 100;
+    var WIDGET_HEIGHT = 150;
 
     // Templates
     var snippetWidgetTemplate     = require("text!templates/SnippetWidget.html"),

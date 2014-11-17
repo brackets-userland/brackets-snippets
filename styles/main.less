@@ -10,12 +10,22 @@
     top: 10px;
     bottom: 10px;
 
+    .btn-group-vertical {
+        position: absolute;
+        left: -30px;
+        top: 25px;
+
+        .btn-mini {
+            width: 22px;
+        }
+    }
+
     .left-column {
         float: left;
 
         .snippets-list {
             border: 1px solid @borderColor;
-            max-height: 80px;
+            max-height: 90px;
             overflow-x: hidden;
             overflow-y: scroll;
 
@@ -45,14 +55,9 @@
             pre {
                 background-color: @codeEditorBackground;
                 border: 1px solid @borderColor;
-                min-height: 5em;
+                min-height: 106px;
             }
         }
-    }
-
-    .right-column {
-        float: right;
-        margin-right: 1em;
     }
 
 }
