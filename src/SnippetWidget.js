@@ -163,21 +163,44 @@ define(function (require, exports) {
             positionStart = {
                 line: this.originalCursorPosition.line,
                 ch: 0
+            },
+            positionEnd = {
+                line: this.originalCursorPosition.line,
+                ch: 999
             };
 
+        var currentLine     = this.hostEditor.document.getRange(positionStart, positionEnd),
+            indent          = "",
+            lineBreakBefore = false;
+
+        // if line is not empty
+        if (currentLine.match(/\S/)) {
+            lineBreakBefore = true;
+            var ws = currentLine.match(/^\s+/);
+            indent = ws ? ws[0] : "";
+        } else {
+            var i = this.originalCursorPosition.ch;
+            while (i--) { indent += " "; }
+        }
+
         // indent all lines of the snippet with current indentation
-        var indent = this.originalCursorPosition.ch,
-            lines = textToInsert.split("\n");
+        var lines = textToInsert.split("\n");
         textToInsert = lines.map(function (line) {
-            var i = indent;
-            while (i--) { line = " " + line; }
-            return line;
+            return indent + line;
         }).join("\n");
 
         // insert the text itself
-        this.hostEditor.document.replaceRange(textToInsert, positionStart);
+        if (lineBreakBefore) {
+            textToInsert = "\n" + textToInsert;
+            lines.length += 1;
+            this.hostEditor.document.replaceRange(textToInsert, positionEnd);
+        } else {
+            this.hostEditor.document.replaceRange(textToInsert, positionStart);
+        }
+
         // close the widget
         this.close();
+
         // fix cursor position only after close has been called
         this.hostEditor.setCursorPos(this.originalCursorPosition.line + lines.length - 1, this.originalCursorPosition.ch);
     };
