@@ -1,6 +1,7 @@
 @borderColor: #b2b5b5;
 @white: #ffffff;
 @selectedEntry: #e0f0fa;
+@codeEditorBackground: #f8f8f8;
 
 .brackets-snippets-widget {
     position: absolute;
@@ -30,4 +31,28 @@
             }
         }
     }
+
+    .center-column {
+        float: left;
+
+        .current-snippet {
+            margin: 0 1em;
+
+            .snippet-name {
+                margin-bottom: 0.5em;
+            }
+
+            pre {
+                background-color: @codeEditorBackground;
+                border: 1px solid @borderColor;
+                min-height: 5em;
+            }
+        }
+    }
+
+    .right-column {
+        float: right;
+        margin-right: 1em;
+    }
+
 }

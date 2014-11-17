@@ -43,31 +43,52 @@ define(function (require, exports) {
         // save elements so we don't have to search for them later
         this.$searchInput = this.$htmlContent.find(".snippet-search-input");
         this.$snippetsList = this.$htmlContent.find(".snippets-list");
+        this.$currentSnippetArea = this.$htmlContent.find(".current-snippet");
     };
 
     // override onAdded to call setInlineWidgetHeight
     SnippetWidget.prototype.onAdded = function () {
-        var self = this;
         this.parentClass.onAdded.call(this);
+        var self = this;
+
         // make sure the height is being animated
         this.hostEditor.setInlineWidgetHeight(this, this.height, true);
-        // add focus to search input
-        this.$searchInput
-            .on("keydown", function (e) {
-                // move between snippets with arrows
-                if (e.which === 38 || e.which === 40) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    if (e.which === 38) {
-                        self.selectPrevSnippet();
-                    } else {
-                        self.selectNextSnippet();
-                    }
+
+        // add events for arrow keys to navigate between snippets
+        this.$htmlContent.on("keydown", function (e) {
+            // move between snippets with arrows
+            if (e.which === 38 || e.which === 40) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                if (e.which === 38) {
+                    self.selectPrevSnippet();
+                } else {
+                    self.selectNextSnippet();
                 }
-            })
-            .on("focus change keyup", function () {
-                self.refreshSnippets();
-            }).focus();
+                // return focus to the input if it's not there
+                self.$searchInput.focus();
+            }
+            // insert snippet to the current line position
+            if (e.which === 13) { // enter key
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                self.insertSnippet();
+            }
+        });
+
+        // refresh widget on every key and add focus to search input
+        this.$searchInput.on("focus change keyup", function () {
+            self.refreshSnippets();
+        }).focus();
+
+        // add events to snippet list
+        this.$snippetsList.on("click", ".snippet-entry", function () {
+            var snippetId = parseInt($(this).attr("x-snippet-id"), 10),
+                s = _.find(self.snippets, function (s) { return s._id === snippetId; });
+            if (s) {
+                self.selectSnippet(s);
+            }
+        });
     };
 
     SnippetWidget.prototype.refreshSnippets = function () {
@@ -85,29 +106,30 @@ define(function (require, exports) {
     SnippetWidget.prototype.selectSnippet = function (snippet) {
         if (snippet) {
             // if a snippet was passed, explicitly set this snippet as selected
-            this.selectedSnippetId = snippet._id;
-        } else if (this.selectedSnippetId) {
+            this.selectedSnippet = snippet;
+        } else if (this.selectedSnippet) {
             // if a snippet was previously selected try to find this snippet between current snippets
-            var s = _.find(this.snippets, function (s) { return s._id === this.selectedSnippetId; }, this);
+            var s = _.find(this.snippets, function (s) { return s._id === this.selectedSnippet._id; }, this);
             // if not found, just select first one available
-            if (!s) { this.selectedSnippetId = this.snippets.length > 0 ? this.snippets[0]._id : null; }
+            if (!s) { this.selectedSnippet = this.snippets.length > 0 ? this.snippets[0] : null; }
         } else {
             // no snippet was passed explicitly and no snippet was previously selected, select fist one
-            this.selectedSnippetId = this.snippets.length > 0 ? this.snippets[0]._id : null;
+            this.selectedSnippet = this.snippets.length > 0 ? this.snippets[0] : null;
         }
 
-        if (!this.selectedSnippetId && this.snippets.length > 0) {
+        if (!this.selectedSnippet && this.snippets.length > 0) {
             throw new Error("[brackets-snippets] No snippet selected!");
         }
 
         this.$snippetsList.find(".selected").removeClass("selected");
-        this.$snippetsList.find("[x-snippet-id='" + this.selectedSnippetId + "']").addClass("selected");
+        this.$snippetsList.find("[x-snippet-id='" + this.selectedSnippet._id + "']").addClass("selected");
+        this.renderSnippet();
     };
 
     SnippetWidget.prototype.selectPrevSnippet = function () {
         var prevSnippet = null;
         for (var i = 0; i < this.snippets.length; i++) {
-            if (this.snippets[i]._id === this.selectedSnippetId) {
+            if (this.snippets[i]._id === this.selectedSnippet._id) {
                 prevSnippet = this.snippets[i - 1];
                 break;
             }
@@ -120,7 +142,7 @@ define(function (require, exports) {
     SnippetWidget.prototype.selectNextSnippet = function () {
         var nextSnippet = null;
         for (var i = 0; i < this.snippets.length; i++) {
-            if (this.snippets[i]._id === this.selectedSnippetId) {
+            if (this.snippets[i]._id === this.selectedSnippet._id) {
                 nextSnippet = this.snippets[i + 1];
                 break;
             }
@@ -128,6 +150,15 @@ define(function (require, exports) {
         if (nextSnippet) {
             this.selectSnippet(nextSnippet);
         }
+    };
+
+    SnippetWidget.prototype.renderSnippet = function () {
+        this.$currentSnippetArea.children(".snippet-name").text(this.selectedSnippet.name);
+        this.$currentSnippetArea.children("pre").text(this.selectedSnippet.template);
+    };
+
+    SnippetWidget.prototype.insertSnippet = function () {
+        // TODO:
     };
 
     function triggerWidget() {
