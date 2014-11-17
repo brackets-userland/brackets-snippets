@@ -4,6 +4,9 @@ define(function (require, exports) {
     // Brackets modules
     var _ = brackets.getModule("thirdparty/lodash");
 
+    // Local modules
+    var SnippetDialog = require("src/SnippetDialog");
+
     // src https://developer.mozilla.org/en/docs/Web/JavaScript/Guide/Regular_Expressions
     function escapeRegExp(string){
         return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
@@ -52,8 +55,13 @@ define(function (require, exports) {
         });
     }
 
-    exports.init   = init;
-    exports.getAll = getAll;
-    exports.search = search;
+    function addNewDialog() {
+        SnippetDialog.show();
+    }
+
+    exports.init          = init;
+    exports.getAll        = getAll;
+    exports.search        = search;
+    exports.addNewDialog  = addNewDialog;
 
 });

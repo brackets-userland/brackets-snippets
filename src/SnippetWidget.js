@@ -90,6 +90,11 @@ define(function (require, exports) {
                 self.selectSnippet(s);
             }
         });
+
+        // add event for new snippet
+        this.$htmlContent.find(".new-snippet").on("click", function () {
+            Snippets.addNewDialog();
+        });
     };
 
     SnippetWidget.prototype.refreshSnippets = function () {
