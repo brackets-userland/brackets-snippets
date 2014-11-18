@@ -59,15 +59,25 @@ define(function (require, exports) {
         });
     }
 
-    function addNewDialog() {
+    function addNewSnippetDialog() {
         return SnippetDialog.show().done(function (newSnippet) {
             loadSnippet(newSnippet);
         });
     }
 
-    exports.init          = init;
-    exports.getAll        = getAll;
-    exports.search        = search;
-    exports.addNewDialog  = addNewDialog;
+    function editSnippetDialog(snippet) {
+        // TODO
+    }
+
+    function deleteSnippetDialog(snippet) {
+        // TODO
+    }
+
+    exports.init                  = init;
+    exports.getAll                = getAll;
+    exports.search                = search;
+    exports.addNewSnippetDialog   = addNewSnippetDialog;
+    exports.editSnippetDialog     = editSnippetDialog;
+    exports.deleteSnippetDialog   = deleteSnippetDialog;
 
 });

@@ -46,6 +46,8 @@ define(function (require, exports) {
         this.$searchInput = this.$htmlContent.find(".snippet-search-input");
         this.$snippetsList = this.$htmlContent.find(".snippets-list");
         this.$currentSnippetArea = this.$htmlContent.find(".current-snippet");
+        this.$editSnippetBtn = this.$htmlContent.find(".edit-snippet");
+        this.$deleteSnippetBtn = this.$htmlContent.find(".delete-snippet");
     };
 
     // override onAdded to call setInlineWidgetHeight
@@ -98,7 +100,21 @@ define(function (require, exports) {
 
         // add event for new snippet
         this.$htmlContent.find(".new-snippet").on("click", function () {
-            Snippets.addNewDialog().done(function () {
+            Snippets.addNewSnippetDialog().done(function () {
+                self.refreshSnippets(true);
+            });
+        });
+
+        // event for snippet editing
+        this.$editSnippetBtn.on("click", function () {
+            Snippets.editSnippetDialog(self.selectedSnippet).done(function () {
+                self.refreshSnippets(true);
+            });
+        });
+
+        // event for snippet deleting
+        this.$deleteSnippetBtn.on("click", function () {
+            Snippets.deleteSnippetDialog(self.selectedSnippet).done(function () {
                 self.refreshSnippets(true);
             });
         });
@@ -169,16 +185,19 @@ define(function (require, exports) {
 
     SnippetWidget.prototype.renderSnippet = function () {
         var $snippetName  = this.$currentSnippetArea.children(".snippet-name"),
-            $pre          = this.$currentSnippetArea.children("pre");
+            $pre          = this.$currentSnippetArea.children("pre"),
+            isSnippetSelected = !!this.selectedSnippet;
 
-        if (!this.selectedSnippet) {
+        $pre.toggle(isSnippetSelected);
+        this.$editSnippetBtn.prop("disabled", !isSnippetSelected);
+        this.$deleteSnippetBtn.prop("disabled", !isSnippetSelected);
+
+        if (isSnippetSelected) {
+            $snippetName.text(this.selectedSnippet.name);
+            $pre.text(this.selectedSnippet.template);
+        } else {
             $snippetName.text(Strings.NO_SNIPPET_SELECTED);
-            $pre.hide();
-            return;
         }
-
-        $snippetName.text(this.selectedSnippet.name);
-        $pre.show().text(this.selectedSnippet.template);
     };
 
     SnippetWidget.prototype.insertSnippet = function () {
