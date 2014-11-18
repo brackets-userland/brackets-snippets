@@ -1,3 +1,6 @@
 {{ #snippets }}
     <div class="snippet-entry" x-snippet-id="{{ _id }}">{{ name }}</div>
 {{ /snippets }}
+{{ ^snippets }}
+    {{ Strings.NO_SNIPPETS_FOUND }}
+{{ /snippets }}

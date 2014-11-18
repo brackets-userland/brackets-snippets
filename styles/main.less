@@ -28,8 +28,14 @@
         .snippets-list {
             border: 1px solid @borderColor;
             max-height: 90px;
+            max-width: 218px;
             overflow-x: hidden;
             overflow-y: scroll;
+
+            &.is-empty {
+                border: none;
+                overflow: auto;
+            }
 
             .dark & {
                 border: 1px solid @white;

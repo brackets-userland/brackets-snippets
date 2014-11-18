@@ -98,25 +98,26 @@ define(function (require, exports) {
                 self.insertSnippet();
             });
 
+        // function to call after snippets collection has changed by new/edit/delete
+        var refresh = function () {
+            self.refreshSnippets(true);
+            self.$searchInput.focus();
+        };
+
         // add event for new snippet
         this.$htmlContent.find(".new-snippet").on("click", function () {
-            Snippets.addNewSnippetDialog().done(function () {
-                self.refreshSnippets(true);
-            });
+            var newSnippet = { name: self.$searchInput.val().trim() };
+            Snippets.addNewSnippetDialog(newSnippet).done(refresh);
         });
 
         // event for snippet editing
         this.$editSnippetBtn.on("click", function () {
-            Snippets.editSnippetDialog(self.selectedSnippet).done(function () {
-                self.refreshSnippets(true);
-            });
+            Snippets.editSnippetDialog(self.selectedSnippet).done(refresh);
         });
 
         // event for snippet deleting
         this.$deleteSnippetBtn.on("click", function () {
-            Snippets.deleteSnippetDialog(self.selectedSnippet).done(function () {
-                self.refreshSnippets(true);
-            });
+            Snippets.deleteSnippetDialog(self.selectedSnippet).done(refresh);
         });
     };
 
@@ -126,8 +127,10 @@ define(function (require, exports) {
             this.lastQuery = query;
             this.snippets = Snippets.search(query);
             this.$snippetsList.html(Mustache.render(snippetWidgetListTemplate, {
-                snippets: this.snippets
-            }));
+                snippets: this.snippets,
+                Strings: Strings
+            })).toggleClass("is-empty", this.snippets.length === 0);
+
             this.selectSnippet();
         }
     };

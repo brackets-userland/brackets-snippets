@@ -11,12 +11,13 @@ define(function (require, exports) {
     // Templates
     var questionDialogTemplate = require("text!templates/QuestionDialog.html");
 
-    function askQuestion(title, question) {
+    function askQuestion(title, question, responseType) {
         var defer = $.Deferred();
 
         var compiledTemplate = Mustache.render(questionDialogTemplate, {
             title: title,
             question: question,
+            stringInput: responseType === "string",
             Strings: Strings
         });
 
@@ -33,11 +34,19 @@ define(function (require, exports) {
         });
 
         dialog.done(function (buttonId) {
-            if (buttonId === "ok") {
-                var userResponse = dialog.getElement().find("input").val().trim();
-                defer.resolve(userResponse);
+            if (responseType === "string") {
+                if (buttonId === "ok") {
+                    var userResponse = dialog.getElement().find("input").val().trim();
+                    defer.resolve(userResponse);
+                } else {
+                    defer.reject();
+                }
             } else {
-                defer.reject();
+                if (buttonId === "ok") {
+                    defer.resolve(true);
+                } else {
+                    defer.reject(false);
+                }
             }
         });
 

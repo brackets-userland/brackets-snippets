@@ -8,7 +8,9 @@
         <p>
             {{ question }}
         </p>
-        <input class="stringInput" type="text" />
+        {{ #stringInput }}
+            <input class="stringInput" type="text" />
+        {{ /stringInput }}
     </div>
     <div class="modal-footer">
         <button class="dialog-button btn" data-button-id="cancel">{{Strings.CANCEL}}</button>

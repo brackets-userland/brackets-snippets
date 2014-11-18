@@ -5,7 +5,9 @@ define(function (require, exports) {
     var _ = brackets.getModule("thirdparty/lodash");
 
     // Local modules
-    var SnippetDialog = require("src/SnippetDialog");
+    var SnippetDialog = require("src/SnippetDialog"),
+        Strings       = require("strings"),
+        Utils         = require("src/Utils");
 
     // src https://developer.mozilla.org/en/docs/Web/JavaScript/Guide/Regular_Expressions
     function escapeRegExp(string){
@@ -14,6 +16,24 @@ define(function (require, exports) {
 
     var SnippetCollection = [],
         lastSnippetId = 0;
+
+    function deleteSnippet(snippet) {
+        var idx = SnippetCollection.length;
+        while (idx--) {
+            if (SnippetCollection[idx]._id === snippet._id) {
+                SnippetCollection.splice(idx, 1);
+            }
+        }
+    }
+
+    function updateSnippet(newSnippet) {
+        var oldSnippet = _.find(SnippetCollection, function (s) {
+            return s._id === newSnippet._id;
+        });
+        Object.keys(newSnippet).forEach(function (key) {
+            oldSnippet[key] = newSnippet[key];
+        });
+    }
 
     function loadSnippet(snippet) {
         // every snippets needs to have an unique generated ID
@@ -59,18 +79,22 @@ define(function (require, exports) {
         });
     }
 
-    function addNewSnippetDialog() {
-        return SnippetDialog.show().done(function (newSnippet) {
+    function addNewSnippetDialog(snippet) {
+        return SnippetDialog.show(snippet).done(function (newSnippet) {
             loadSnippet(newSnippet);
         });
     }
 
     function editSnippetDialog(snippet) {
-        // TODO
+        return SnippetDialog.show(snippet).done(function (newSnippet) {
+            updateSnippet(newSnippet);
+        });
     }
 
     function deleteSnippetDialog(snippet) {
-        // TODO
+        return Utils.askQuestion(Strings.QUESTION, Strings.SNIPPET_DELETE_CONFIRM, "boolean").done(function () {
+            deleteSnippet(snippet);
+        });
     }
 
     exports.init                  = init;

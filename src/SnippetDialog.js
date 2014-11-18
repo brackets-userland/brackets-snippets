@@ -32,16 +32,16 @@ define(function (require, exports) {
             $snippetEditor.val(snippet.template);
         }
 
-        $snippetName.on("change", function () {
+        $snippetName.on("keyup change", function () {
             snippet.name = $(this).val().trim();
         });
 
-        $snippetEditor.on("change", function () {
+        $snippetEditor.on("keyup change", function () {
             snippet.template = $(this).val().trim();
         });
 
         $dialog.find(".btn-load-from-gist").on("click", function () {
-            Utils.askQuestion(Strings.LOAD_SNIPPET_FROM_GIST, String.ENTER_GIST_URL)
+            Utils.askQuestion(Strings.LOAD_SNIPPET_FROM_GIST, String.ENTER_GIST_URL, "string")
                 .done(function (url) {
 
                     var m = url.match(/gist\.github\.com\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)/),
