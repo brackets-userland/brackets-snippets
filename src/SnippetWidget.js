@@ -221,8 +221,19 @@ define(function (require, exports) {
         this.close();
 
         // fix cursor position only after close has been called
-        var p = origLine + lines.length;
-        this.hostEditor.setCursorPos(lineBreakAfter ? p - 1 : p, this.originalCursorPosition.ch);
+        var lastSnippetLine = origLine + lines.length,
+            cursorLine      = lineBreakAfter ? lastSnippetLine - 1 : lastSnippetLine,
+            cursorCh        = this.originalCursorPosition.ch,
+            cursorLineStart = { line: cursorLine, ch: 0 },
+            cursorLineEnd   = { line: cursorLine, ch: 999 };
+
+        // if cursorLine is empty, make sure it contains enough whitespace to preserve indentation
+        var cursorLineContent = doc.getRange(cursorLineStart, cursorLineEnd);
+        if (cursorLineContent.match(/^\s*$/) && cursorLineContent !== indent) {
+            doc.replaceRange(indent, cursorLineStart, cursorLineEnd);
+        }
+
+        this.hostEditor.setCursorPos(cursorLine, cursorCh);
     };
 
     function triggerWidget() {
