@@ -6,7 +6,8 @@ define(function (require, exports) {
         Dialogs = brackets.getModule("widgets/Dialogs");
 
     // Local modules
-    var Strings = require("strings");
+    var Strings = require("strings"),
+        Utils   = require("src/Utils");
 
     // Templates
     var template = require("text!templates/SnippetDialog.html");
@@ -32,11 +33,51 @@ define(function (require, exports) {
         }
 
         $snippetName.on("change", function () {
-            snippet.name = $(this).val();
+            snippet.name = $(this).val().trim();
         });
 
         $snippetEditor.on("change", function () {
-            snippet.template = $(this).val();
+            snippet.template = $(this).val().trim();
+        });
+
+        $dialog.find(".btn-load-from-gist").on("click", function () {
+            Utils.askQuestion(Strings.LOAD_SNIPPET_FROM_GIST, String.ENTER_GIST_URL)
+                .done(function (url) {
+
+                    var m = url.match(/gist\.github\.com\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)/),
+                        gistId = null;
+
+                    if (m) {
+                        gistId = m[2];
+                    }
+
+                    if (!gistId) {
+                        console.error("[brackets-snippets] no gistId found in string: " + url);
+                        return;
+                    }
+
+                    $.ajax({
+                        url: "https://api.github.com/gists/" + gistId,
+                        dataType: "json",
+                        cache: false
+                    })
+                    .done(function (data) {
+
+                        var gistFiles = _.keys(data.files);
+
+                        // take only first file here
+                        var name = gistFiles[0];
+                        var template = data.files[name].content;
+
+                        $snippetName.val(name).focus();
+                        $snippetEditor.val(template);
+
+                    })
+                    .fail(function (err) {
+                        console.error("[brackets-snippets] " + err);
+                    });
+
+                });
         });
     }
 
@@ -54,7 +95,6 @@ define(function (require, exports) {
 
         dialog.done(function (buttonId) {
             if (buttonId === "ok") {
-                console.log(snippet);
                 defer.resolve(snippet);
             } else {
                 defer.reject();

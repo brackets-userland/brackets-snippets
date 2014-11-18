@@ -1,3 +1,5 @@
+@import "_mixins.less";
+
 @borderColor: #b2b5b5;
 @white: #ffffff;
 @selectedEntry: #e0f0fa;
@@ -65,12 +67,19 @@
 .snippet-dialog {
 
     .snippet-name, .snippet-editor {
-        box-sizing: border-box;
-        width: 100%;
+        .full-width();
     }
 
     .snippet-editor {
         height: 10em;
+    }
+
+}
+
+.snippets-question-dialog {
+
+    input {
+        .full-width();
     }
 
 }
