@@ -10,7 +10,8 @@ define(function (require, exports) {
 
     // Local modules
     var Preferences = require("src/Preferences"),
-        Snippets    = require("src/Snippets");
+        Snippets    = require("src/Snippets"),
+        Strings     = require("strings");
 
     // Constants
     var WIDGET_HEIGHT = 150;
@@ -130,11 +131,13 @@ define(function (require, exports) {
         }
 
         if (!this.selectedSnippet && this.snippets.length > 0) {
-            throw new Error("[brackets-snippets] No snippet selected!");
+            console.error("[brackets-snippets] no snippet selected!");
         }
 
         this.$snippetsList.find(".selected").removeClass("selected");
-        this.$snippetsList.find("[x-snippet-id='" + this.selectedSnippet._id + "']").addClass("selected");
+        if (this.selectedSnippet) {
+            this.$snippetsList.find("[x-snippet-id='" + this.selectedSnippet._id + "']").addClass("selected");
+        }
         this.renderSnippet();
     };
 
@@ -165,8 +168,17 @@ define(function (require, exports) {
     };
 
     SnippetWidget.prototype.renderSnippet = function () {
-        this.$currentSnippetArea.children(".snippet-name").text(this.selectedSnippet.name);
-        this.$currentSnippetArea.children("pre").text(this.selectedSnippet.template);
+        var $snippetName  = this.$currentSnippetArea.children(".snippet-name"),
+            $pre          = this.$currentSnippetArea.children("pre");
+
+        if (!this.selectedSnippet) {
+            $snippetName.text(Strings.NO_SNIPPET_SELECTED);
+            $pre.hide();
+            return;
+        }
+
+        $snippetName.text(this.selectedSnippet.name);
+        $pre.show().text(this.selectedSnippet.template);
     };
 
     SnippetWidget.prototype.insertSnippet = function () {
