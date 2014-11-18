@@ -15,6 +15,12 @@ define(function (require, exports) {
     var SnippetCollection = [],
         lastSnippetId = 0;
 
+    function loadSnippet(snippet) {
+        // every snippets needs to have an unique generated ID
+        snippet._id = ++lastSnippetId;
+        SnippetCollection.push(snippet);
+    }
+
     function loadSnippets() {
         var source = [
             {
@@ -31,9 +37,7 @@ define(function (require, exports) {
             }
         ];
         _.each(source, function (snippet) {
-            // every snippets needs to have an unique generated ID
-            snippet._id = ++lastSnippetId;
-            SnippetCollection.push(snippet);
+            loadSnippet(snippet);
         });
     }
 
@@ -56,7 +60,9 @@ define(function (require, exports) {
     }
 
     function addNewDialog() {
-        SnippetDialog.show();
+        return SnippetDialog.show().done(function (newSnippet) {
+            loadSnippet(newSnippet);
+        });
     }
 
     exports.init          = init;

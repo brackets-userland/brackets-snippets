@@ -97,13 +97,15 @@ define(function (require, exports) {
 
         // add event for new snippet
         this.$htmlContent.find(".new-snippet").on("click", function () {
-            Snippets.addNewDialog();
+            Snippets.addNewDialog().done(function () {
+                self.refreshSnippets(true);
+            });
         });
     };
 
-    SnippetWidget.prototype.refreshSnippets = function () {
+    SnippetWidget.prototype.refreshSnippets = function (force) {
         var query = this.$searchInput.val();
-        if (query !== this.lastQuery || typeof this.lastQuery !== "string") {
+        if (force || query !== this.lastQuery || typeof this.lastQuery !== "string") {
             this.lastQuery = query;
             this.snippets = Snippets.search(query);
             this.$snippetsList.html(Mustache.render(snippetWidgetListTemplate, {
@@ -211,7 +213,8 @@ define(function (require, exports) {
             lines.length += 1;
             doc.replaceRange(textToInsert, positionEnd);
         } else {
-            doc.replaceRange(textToInsert, positionStart);
+            // replace whole line as lineBreakBefore false means current line contains only whitespace
+            doc.replaceRange(textToInsert, positionStart, positionEnd);
         }
 
         // close the widget

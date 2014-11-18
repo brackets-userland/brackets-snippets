@@ -69,8 +69,8 @@ define(function (require, exports) {
                         var name = gistFiles[0];
                         var template = data.files[name].content;
 
-                        $snippetName.val(name).focus();
-                        $snippetEditor.val(template);
+                        $snippetName.val(name).trigger("change").focus();
+                        $snippetEditor.val(template).trigger("change");
 
                     })
                     .fail(function (err) {
