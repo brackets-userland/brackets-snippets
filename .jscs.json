@@ -20,7 +20,6 @@
     "disallowSpaceBeforePostfixUnaryOperators":     ["++", "--"],
     "requireSpaceBeforeBinaryOperators":            ["=", "+", "-", "/", "*", "==", "===", "!=", "!=="],
     "requireSpaceAfterBinaryOperators":             ["=", ",", "+", "-", "/", "*", "==", "===", "!=", "!=="],
-    "requireCamelCaseOrUpperCaseIdentifiers":       true,
     "disallowKeywords":                             ["with"],
     "disallowMultipleLineStrings":                  true,
     "disallowMultipleLineBreaks":                   true,
@@ -37,9 +36,5 @@
     "disallowYodaConditions":                       true,
     "requireSpaceAfterLineComment":                 true,
 
-    "additionalRules":                              ["tools/jscs-rules/*.js"],
-    "forbiddenFunctions":                           [
-                                                        "$.",
-                                                        ["$.map","_.map"], ["$.each","_.each"]
-                                                    ]
+    "additionalRules":                              ["tools/jscs-rules/*.js"]
 }

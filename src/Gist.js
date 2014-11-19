@@ -161,7 +161,7 @@ define(function (require, exports) {
 
         var finish = function (url) {
             _downloadGist(url)
-                .done(function(newSnippets) {
+                .done(function (newSnippets) {
 
                     // dispose of old snippets
                     if (options.deleteLocal) {

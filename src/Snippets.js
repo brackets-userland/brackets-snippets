@@ -11,7 +11,7 @@ define(function (require, exports) {
         Utils         = require("src/Utils");
 
     // src https://developer.mozilla.org/en/docs/Web/JavaScript/Guide/Regular_Expressions
-    function escapeRegExp(string){
+    function escapeRegExp(string) {
         return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
     }
 
