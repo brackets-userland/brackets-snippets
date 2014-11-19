@@ -2,12 +2,13 @@ define(function (require, exports) {
     "use strict";
 
     // Brackets modules
-    var _         = brackets.getModule("thirdparty/lodash"),
-        Dialogs   = brackets.getModule("widgets/Dialogs"),
-        NativeApp = brackets.getModule("utils/NativeApp");
+    var _               = brackets.getModule("thirdparty/lodash"),
+        Dialogs         = brackets.getModule("widgets/Dialogs"),
+        NativeApp       = brackets.getModule("utils/NativeApp");
 
     // Local modules
-    var Preferences = require("src/Preferences"),
+    var Gist        = require("src/Gist"),
+        Preferences = require("src/Preferences"),
         Strings     = require("strings");
 
     // Templates
@@ -88,6 +89,10 @@ define(function (require, exports) {
                 _connectMessage(message);
             });
 
+        });
+
+        $dialog.find(".btn-gist-export").on("click", function () {
+            Gist.uploadAll();
         });
     }
 
