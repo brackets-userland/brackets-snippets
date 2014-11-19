@@ -8,6 +8,7 @@ define({
     ENTER_GIST_URL:                     "Enter a Gist url",
     ERROR:                              "Error",
     ERROR_API_REQ_FAIL:                 "API request failed: ",
+    ERROR_DEFAULT_GIST_NOTFOUND:        "Default Gist was not found among your Gists",
     ERROR_INVALID_AUTH_SCOPE:           "Token auth scope doesn't contain gist rights: ",
     ERROR_NO_AUTH_SCOPE:                "No auth scope received from API request.",
     ERROR_UNKNOWN:                      "Unknown error",
@@ -15,9 +16,14 @@ define({
     EXPORT_TO_GIST:                     "Export to Gist",
     GIST_AUTH_HINT:                     "You need to create an access token with \"gist\" rights here:",
     GIST_AUTHORIZATION:                 "Gist authorization",
+    IMPORT_FROM_GIST:                   "Import from Gist",
+    IMPORT_FROM_GIST_QUESTION:          "Select an url to download snippets from or leave empty for default",
+    IMPORT_FROM_GIST_DELETE_LOCAL:      "Do you wish to delete all local snippets?",
+    IMPORT_SUCCESSFUL:                  "Import completed successfully!",
     LOAD_SNIPPET_FROM_GIST:             "Load a snippet from Gist url",
     MSG_AUTH_SUCCESS:                   "Authorization successfull for ",
     MSG_CONNECTED_AS:                   "Connected as ",
+    NO:                                 "No",
     NO_SNIPPET_SELECTED:                "No snippet selected",
     NO_SNIPPETS_FOUND:                  "No snippets found",
     OK:                                 "OK",
@@ -26,5 +32,6 @@ define({
     SETTINGS:                           "Settings",
     SNIPPET_DELETE_CONFIRM:             "Do you really wish to delete this snippet?",
     SNIPPET_DIALOG:                     "Snippet Dialog",
-    SNIPPET_NAME:                       "Snippet Name"
+    SNIPPET_NAME:                       "Snippet Name",
+    YES:                                "Yes"
 });

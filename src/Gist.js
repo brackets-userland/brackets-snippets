@@ -13,7 +13,7 @@ define(function (require, exports) {
         Strings     = require("strings");
 
     // Constants
-    var DEFAULT_GIST_DESCRIPTION = "My code snippets for Brackets";
+    var DEFAULT_GIST_DESCRIPTION = "My code snippets for Brackets (created using https://github.com/zaggino/brackets-snippets)";
 
     // Variables
     var githubToken;
@@ -123,6 +123,99 @@ define(function (require, exports) {
         return defer.promise();
     }
 
+    function _downloadGist(url) {
+        var defer = $.Deferred();
+
+        $.ajax({
+            url: url,
+            type: "GET",
+            dataType: "json",
+            cache: false,
+            headers: {
+                "Authorization": "token " + githubToken
+            }
+        })
+        .done(function (data) {
+            var snippets = Object.keys(data.files).map(function (name) {
+                return {
+                    name: name,
+                    template: data.files[name].content
+                };
+            });
+            defer.resolve(snippets);
+        })
+        .fail(function (err, errdesc, statusText) {
+            Dialogs.showModalDialog(
+                DefaultDialogs.DIALOG_ID_ERROR,
+                statusText,
+                err.responseText
+            );
+            defer.reject(err);
+        });
+
+        return defer.promise();
+    }
+
+    function downloadAll(url, options) {
+        var defer = $.Deferred();
+
+        var finish = function (url) {
+            _downloadGist(url)
+                .done(function(newSnippets) {
+
+                    // dispose of old snippets
+                    if (options.deleteLocal) {
+                        Snippets.clearAll();
+                    }
+
+                    // insert new snippets
+                    newSnippets.forEach(function (snippet) {
+                        Snippets.loadSnippet(snippet);
+                    });
+
+                    // show dialog about success
+                    Dialogs.showModalDialog(
+                        DefaultDialogs.DIALOG_ID_INFO,
+                        Strings.IMPORT_FROM_GIST,
+                        Strings.IMPORT_SUCCESSFUL
+                    );
+
+                    defer.resolve();
+
+                })
+                .fail(function () {
+                    defer.reject();
+                });
+        };
+
+        if (!_authorize()) {
+            defer.reject();
+        }
+
+        if (url) {
+            finish(url);
+        } else {
+            _findGist().done(function (found) {
+
+                if (found) {
+                    finish(found.url);
+                } else {
+                    Dialogs.showModalDialog(
+                        DefaultDialogs.DIALOG_ID_ERROR,
+                        Strings.ERROR,
+                        Strings.ERROR_DEFAULT_GIST_NOTFOUND
+                    );
+                    defer.reject();
+                }
+
+            }).fail(function () {
+                defer.reject();
+            });
+        }
+
+        return defer.promise();
+    }
+
     function uploadAll() {
         var defer = $.Deferred();
 
@@ -145,6 +238,7 @@ define(function (require, exports) {
         return defer.promise();
     }
 
-    exports.uploadAll = uploadAll;
+    exports.downloadAll = downloadAll;
+    exports.uploadAll   = uploadAll;
 
 });

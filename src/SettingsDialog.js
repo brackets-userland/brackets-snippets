@@ -9,7 +9,8 @@ define(function (require, exports) {
     // Local modules
     var Gist        = require("src/Gist"),
         Preferences = require("src/Preferences"),
-        Strings     = require("strings");
+        Strings     = require("strings"),
+        Utils       = require("src/Utils");
 
     // Templates
     var template = require("text!templates/SettingsDialog.html");
@@ -89,6 +90,22 @@ define(function (require, exports) {
                 _connectMessage(message);
             });
 
+        });
+
+        $dialog.find(".btn-gist-import").on("click", function () {
+            Utils.askQuestion(Strings.IMPORT_FROM_GIST, Strings.IMPORT_FROM_GIST_QUESTION, "string")
+                .done(function (url) {
+
+                    Utils.askQuestion(Strings. IMPORT_FROM_GIST, Strings.IMPORT_FROM_GIST_DELETE_LOCAL, "boolean")
+                        .done(function (deleteLocal) {
+
+                            Gist.downloadAll(url, {
+                                deleteLocal: deleteLocal
+                            });
+
+                        });
+
+                });
         });
 
         $dialog.find(".btn-gist-export").on("click", function () {

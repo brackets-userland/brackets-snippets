@@ -65,6 +65,12 @@ define(function (require, exports) {
         loadSnippets();
     }
 
+    function clearAll() {
+        while (SnippetCollection.length > 0) {
+            SnippetCollection.splice(0, 1);
+        }
+    }
+
     function getAll() {
         return SnippetCollection;
     }
@@ -92,13 +98,18 @@ define(function (require, exports) {
     }
 
     function deleteSnippetDialog(snippet) {
-        return Utils.askQuestion(Strings.QUESTION, Strings.SNIPPET_DELETE_CONFIRM, "boolean").done(function () {
-            deleteSnippet(snippet);
-        });
+        return Utils.askQuestion(Strings.QUESTION, Strings.SNIPPET_DELETE_CONFIRM, "boolean")
+            .done(function (response) {
+                if (response === true) {
+                    deleteSnippet(snippet);
+                }
+            });
     }
 
     exports.init                  = init;
+    exports.clearAll              = clearAll;
     exports.getAll                = getAll;
+    exports.loadSnippet           = loadSnippet;
     exports.search                = search;
     exports.addNewSnippetDialog   = addNewSnippetDialog;
     exports.editSnippetDialog     = editSnippetDialog;

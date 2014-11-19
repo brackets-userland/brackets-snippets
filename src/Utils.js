@@ -18,6 +18,7 @@ define(function (require, exports) {
             title: title,
             question: question,
             stringInput: responseType === "string",
+            booleanInput: responseType === "boolean",
             Strings: Strings
         });
 
@@ -41,12 +42,8 @@ define(function (require, exports) {
                 } else {
                     defer.reject();
                 }
-            } else {
-                if (buttonId === "ok") {
-                    defer.resolve(true);
-                } else {
-                    defer.reject(false);
-                }
+            } else if (responseType === "boolean") {
+                defer.resolve(buttonId === "true");
             }
         });
 
