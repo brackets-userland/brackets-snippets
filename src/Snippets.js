@@ -5,7 +5,8 @@ define(function (require, exports) {
     var _ = brackets.getModule("thirdparty/lodash");
 
     // Local modules
-    var SnippetDialog = require("src/SnippetDialog"),
+    var Preferences   = require("src/Preferences"),
+        SnippetDialog = require("src/SnippetDialog"),
         Strings       = require("strings"),
         Utils         = require("src/Utils");
 
@@ -17,13 +18,15 @@ define(function (require, exports) {
     var SnippetCollection = [],
         lastSnippetId = 0;
 
-    function deleteSnippet(snippet) {
-        var idx = SnippetCollection.length;
-        while (idx--) {
-            if (SnippetCollection[idx]._id === snippet._id) {
-                SnippetCollection.splice(idx, 1);
-            }
-        }
+    function _persistSnippets() {
+        Preferences.set("SnippetCollection", SnippetCollection);
+    }
+
+    function loadSnippet(snippet) {
+        // every snippets needs to have an unique generated ID
+        snippet._id = ++lastSnippetId;
+        SnippetCollection.push(snippet);
+        _persistSnippets();
     }
 
     function updateSnippet(newSnippet) {
@@ -33,42 +36,35 @@ define(function (require, exports) {
         Object.keys(newSnippet).forEach(function (key) {
             oldSnippet[key] = newSnippet[key];
         });
+        _persistSnippets();
     }
 
-    function loadSnippet(snippet) {
-        // every snippets needs to have an unique generated ID
-        snippet._id = ++lastSnippetId;
-        SnippetCollection.push(snippet);
-    }
-
-    function loadSnippets() {
-        var source = [
-            {
-                name: "1st sample snippet",
-                template: "This is what will be instered at current position (1)"
-            },
-            {
-                name: "2nd sample snippet",
-                template: "This is what will be instered at current position (2)"
-            },
-            {
-                name: "3rd sample snippet",
-                template: "This is what will be instered at current position (3)"
+    function deleteSnippet(snippet) {
+        var idx = SnippetCollection.length;
+        while (idx--) {
+            if (SnippetCollection[idx]._id === snippet._id) {
+                SnippetCollection.splice(idx, 1);
             }
-        ];
-        _.each(source, function (snippet) {
-            loadSnippet(snippet);
-        });
-    }
-
-    function init() {
-        loadSnippets();
+        }
+        _persistSnippets();
     }
 
     function clearAll() {
         while (SnippetCollection.length > 0) {
             SnippetCollection.splice(0, 1);
         }
+        _persistSnippets();
+    }
+
+    function loadSnippets() {
+        var source = Preferences.get("SnippetCollection") || [];
+        source.forEach(function (snippet) {
+            loadSnippet(snippet);
+        });
+    }
+
+    function init() {
+        loadSnippets();
     }
 
     function getAll() {
