@@ -1,0 +1,28 @@
+<div class="snippets-settings-dialog modal">
+    <div class="modal-header">
+        <h1 class="dialog-title">{{ Strings.SETTINGS }}</h1>
+    </div>
+    <div class="modal-body">
+        <div class="section-header">{{ Strings.GIST_AUTHORIZATION }}</div>
+        <p>
+            {{ Strings.GIST_AUTH_HINT }}
+            <a href="#" class="access-token-link">https://github.com/settings/applications</a>
+        </p>
+        <div class="form-horizontal">
+            <div class="control-group">
+                <label class="control-label">{{ Strings.PERSONAL_TOKEN }}</label>
+                <div class="controls">
+                    <div class="input-append">
+                        <input name="github-token" type="text" />
+                        <button class="btn btn-connect-github">{{ Strings.CONNECT }}</button>
+                        <button class="btn btn-clear-github">{{ Strings.CLEAR }}</button>
+                    </div>
+                </div>
+            </div>
+            <p class="github-connect-response"></p>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="dialog-button btn primary" data-button-id="ok">{{Strings.CLOSE}}</button>
+    </div>
+</div>

@@ -9,9 +9,10 @@ define(function (require, exports) {
         InlineWidget      = brackets.getModule("editor/InlineWidget").InlineWidget;
 
     // Local modules
-    var Preferences = require("src/Preferences"),
-        Snippets    = require("src/Snippets"),
-        Strings     = require("strings");
+    var Preferences     = require("src/Preferences"),
+        SettingsDialog  = require("src/SettingsDialog"),
+        Snippets        = require("src/Snippets"),
+        Strings         = require("strings");
 
     // Constants
     var WIDGET_HEIGHT = 150;
@@ -118,6 +119,11 @@ define(function (require, exports) {
         // event for snippet deleting
         this.$deleteSnippetBtn.on("click", function () {
             Snippets.deleteSnippetDialog(self.selectedSnippet).done(refresh);
+        });
+
+        // event for settings dialog
+        this.$htmlContent.find(".snippets-settings").on("click", function () {
+            SettingsDialog.show().done(refresh);
         });
     };
 
