@@ -1,0 +1,19 @@
+(function() {
+    "use strict";
+
+    angular
+        .module("moduleName")
+        .directive("directiveName", function () {
+            return {
+                restrict: "AEC",
+                // template: "Name: {{customer.name}} Address: {{customer.address}}",
+                // templateUrl: "my-customer.html",
+                // transclude: true,
+                // scope: { customerInfo: "=" },
+                link: function (scope, element, attrs) {
+                    ...
+                }
+            };
+        });
+    
+}());

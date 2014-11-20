@@ -9,7 +9,8 @@ define(function (require, exports, module) {
     var defaultPreferences = {
         "triggerSnippetShortcut": {                  "type": "string",            "value": "Ctrl-Alt-Space"      },
         "githubLogin": {                             "type": "string",            "value": null                  },
-        "githubToken": {                             "type": "string",            "value": null                  }
+        "githubToken": {                             "type": "string",            "value": null                  },
+        "snippetDirectories": {                      "type": "array",             "value": []                    }
     };
 
     var prefs = PreferencesManager.getExtensionPrefs(prefix);

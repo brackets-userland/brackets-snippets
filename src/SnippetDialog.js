@@ -6,8 +6,9 @@ define(function (require, exports) {
         Dialogs = brackets.getModule("widgets/Dialogs");
 
     // Local modules
-    var Strings = require("strings"),
-        Utils   = require("src/Utils");
+    var ErrorHandler  = require("src/ErrorHandler"),
+        Strings       = require("strings"),
+        Utils         = require("src/Utils");
 
     // Templates
     var template = require("text!templates/SnippetDialog.html");
@@ -52,7 +53,7 @@ define(function (require, exports) {
                     }
 
                     if (!gistId) {
-                        console.error("[brackets-snippets] no gistId found in string: " + url);
+                        ErrorHandler.show("No gistId found in string: " + url);
                         return;
                     }
 
@@ -74,7 +75,7 @@ define(function (require, exports) {
 
                     })
                     .fail(function (err) {
-                        console.error("[brackets-snippets] " + err);
+                        ErrorHandler.show(err);
                     });
 
                 });

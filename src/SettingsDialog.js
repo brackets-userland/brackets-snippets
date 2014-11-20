@@ -17,7 +17,7 @@ define(function (require, exports) {
 
     // Module variables
     var defer,
-        snippet,
+        dialog,
         $dialog;
 
     // Implementation
@@ -33,7 +33,7 @@ define(function (require, exports) {
             githubToken = Preferences.get("githubToken") || "";
         $dialog.find("[name='github-token']").val(githubToken);
         if (githubLogin && githubToken) {
-            _connectMessage(Strings.MSG_CONNECTED_AS + githubLogin, true);
+            _connectMessage(Strings.MSG_CONNECTED_AS + " " + githubLogin, true);
         }
     }
 
@@ -69,7 +69,7 @@ define(function (require, exports) {
                     return;
                 }
                 if (authScopes.indexOf("gist") === -1) {
-                    _connectMessage(Strings.ERROR_INVALID_AUTH_SCOPE + authScopes);
+                    _connectMessage(Strings.ERROR_INVALID_AUTH_SCOPE + " " + authScopes);
                     return;
                 }
 
@@ -111,18 +111,44 @@ define(function (require, exports) {
         $dialog.find(".btn-gist-export").on("click", function () {
             Gist.uploadAll();
         });
+
+        $dialog.on("change", ".snippet-directory-entry-autoload", function () {
+            var $this               = $(this),
+                fullPath            = $this.parent().attr("x-fullpath"),
+                snippetDirectories  = Preferences.get("snippetDirectories");
+
+            var sd = _.find(snippetDirectories, function (d) {
+                return d.fullPath === fullPath;
+            });
+            sd.autoLoad = $this.prop("checked");
+
+            Preferences.set("snippetDirectories", snippetDirectories);
+        });
+
+        $dialog.on("click", ".btn-add-snippet-directory", function () {
+            Utils.askQuestion(Strings.ADD_SNIPPET_DIRECTORY, Strings.SPECIFY_DIRECTORY_FULLPATH, "string")
+                .done(function (fullPath) {
+                    var snippetDirectories = Preferences.get("snippetDirectories");
+                    snippetDirectories.push({
+                        fullPath: fullPath,
+                        autoLoad: true
+                    });
+                    Preferences.set("snippetDirectories", snippetDirectories);
+                    dialog.close();
+                });
+        });
     }
 
     function show() {
         defer = $.Deferred();
 
         var templateArgs = {
-            Snippet: snippet,
+            SnippetDirectories: Preferences.get("snippetDirectories"),
             Strings: Strings
         };
 
-        var compiledTemplate = Mustache.render(template, templateArgs),
-            dialog = Dialogs.showModalDialogUsingTemplate(compiledTemplate);
+        var compiledTemplate = Mustache.render(template, templateArgs);
+        dialog = Dialogs.showModalDialogUsingTemplate(compiledTemplate);
 
         dialog.done(function () {
             defer.resolve();

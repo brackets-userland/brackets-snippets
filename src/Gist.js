@@ -170,6 +170,7 @@ define(function (require, exports) {
 
                     // insert new snippets
                     newSnippets.forEach(function (snippet) {
+                        snippet.source = "gist";
                         Snippets.loadSnippet(snippet);
                     });
 

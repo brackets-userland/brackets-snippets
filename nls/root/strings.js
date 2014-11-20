@@ -1,6 +1,7 @@
 /*jshint maxlen:false */
 
 define({
+    ADD_SNIPPET_DIRECTORY:              "Add snippet directory",
     CANCEL:                             "Cancel",
     CLEAR:                              "Clear",
     CLOSE:                              "Close",
@@ -9,7 +10,7 @@ define({
     ERROR:                              "Error",
     ERROR_API_REQ_FAIL:                 "API request failed: ",
     ERROR_DEFAULT_GIST_NOTFOUND:        "Default Gist was not found among your Gists",
-    ERROR_INVALID_AUTH_SCOPE:           "Token auth scope doesn't contain gist rights: ",
+    ERROR_INVALID_AUTH_SCOPE:           "Token auth scope doesn't contain gist rights:",
     ERROR_NO_AUTH_SCOPE:                "No auth scope received from API request.",
     ERROR_UNKNOWN:                      "Unknown error",
     ERROR_TOKEN_REQUIRED:               "Gist access token is required to use this feature.",
@@ -22,7 +23,7 @@ define({
     IMPORT_SUCCESSFUL:                  "Import completed successfully!",
     LOAD_SNIPPET_FROM_GIST:             "Load a snippet from Gist url",
     MSG_AUTH_SUCCESS:                   "Authorization successfull for ",
-    MSG_CONNECTED_AS:                   "Connected as ",
+    MSG_CONNECTED_AS:                   "Connected as",
     NO:                                 "No",
     NO_SNIPPET_SELECTED:                "No snippet selected",
     NO_SNIPPETS_FOUND:                  "No snippets found",
@@ -32,6 +33,8 @@ define({
     SETTINGS:                           "Settings",
     SNIPPET_DELETE_CONFIRM:             "Do you really wish to delete this snippet?",
     SNIPPET_DIALOG:                     "Snippet Dialog",
+    SNIPPET_DIRECTORIES:                "Snippet directories",
     SNIPPET_NAME:                       "Snippet Name",
+    SPECIFY_DIRECTORY_FULLPATH:         "Specify directory fullPath:",
     YES:                                "Yes"
 });

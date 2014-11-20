@@ -4,6 +4,7 @@
 @white: #ffffff;
 @selectedEntry: #e0f0fa;
 @codeEditorBackground: #f8f8f8;
+@colorError: #d9534f;
 
 .brackets-snippets-widget {
     position: absolute;
@@ -100,6 +101,21 @@
 
     .github-token {
         .full-width();
+    }
+
+}
+
+.brackets-snippets.error-dialog {
+
+    .modal-header {
+        background-color: @colorError;
+    }
+
+    .dialog-message {
+        white-space: pre;
+        overflow-x: scroll;
+        -webkit-user-select: text;
+        user-select: text;
     }
 
 }

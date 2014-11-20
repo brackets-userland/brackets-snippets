@@ -21,6 +21,17 @@
             </div>
             <p class="github-connect-response"></p>
         </div>
+
+        <hr>
+
+        <div class="section-header">{{ Strings.SNIPPET_DIRECTORIES }}</div>
+        {{ #SnippetDirectories }}
+            <div class="snippet-directory-entry" x-fullpath="{{ fullPath }}">
+                <input class="snippet-directory-entry-autoload" type="checkbox" {{#autoLoad}}checked="checked"{{/autoLoad}} />
+                {{ fullPath }}
+            </div>
+        {{ /SnippetDirectories }}
+        <button class="btn btn-add-snippet-directory">{{ Strings.ADD_SNIPPET_DIRECTORY }}</button>
     </div>
     <div class="modal-footer">
         <button class="btn left btn-gist-import">{{ Strings.IMPORT_FROM_GIST }}</button>

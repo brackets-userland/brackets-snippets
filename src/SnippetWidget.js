@@ -9,7 +9,8 @@ define(function (require, exports) {
         InlineWidget      = brackets.getModule("editor/InlineWidget").InlineWidget;
 
     // Local modules
-    var Preferences     = require("src/Preferences"),
+    var ErrorHandler    = require("src/ErrorHandler"),
+        Preferences     = require("src/Preferences"),
         SettingsDialog  = require("src/SettingsDialog"),
         Snippets        = require("src/Snippets"),
         Strings         = require("strings");
@@ -156,7 +157,7 @@ define(function (require, exports) {
         }
 
         if (!this.selectedSnippet && this.snippets.length > 0) {
-            console.error("[brackets-snippets] no snippet selected!");
+            ErrorHandler.show("SnippetWidget.prototype.selectSnippet: No snippet selected!");
         }
 
         this.$snippetsList.find(".selected").removeClass("selected");
@@ -210,11 +211,13 @@ define(function (require, exports) {
     };
 
     SnippetWidget.prototype.insertSnippet = function () {
-        var doc           = this.hostEditor.document,
-            textToInsert  = this.selectedSnippet.template,
-            origLine      = this.originalCursorPosition.line,
-            positionStart = { line: origLine, ch: 0 },
-            positionEnd   = { line: origLine, ch: 999 };
+        var doc               = this.hostEditor.document,
+            textToInsert      = this.selectedSnippet.template,
+            origLine          = this.originalCursorPosition.line,
+            positionStart     = { line: origLine, ch: 0 },
+            positionEnd       = { line: origLine, ch: 999 },
+            snippetCursorLine = null,
+            snippetCursorCh   = null;
 
         var currentLine     = doc.getRange(positionStart, positionEnd),
             nextLine        = doc.getRange(
@@ -243,8 +246,16 @@ define(function (require, exports) {
 
         // indent all lines of the snippet with current indentation
         var lines = textToInsert.split("\n");
-        textToInsert = lines.map(function (line) {
-            return indent + line;
+        textToInsert = lines.map(function (line, index) {
+            line = indent + line;
+            // check if cursor belongs here
+            var cio = line.indexOf("...");
+            if (cio !== -1) {
+                snippetCursorLine = index;
+                snippetCursorCh = cio;
+                line = line.replace("...", "");
+            }
+            return line;
         }).join("\n");
 
         // insert the text itself
@@ -260,20 +271,30 @@ define(function (require, exports) {
         // close the widget
         this.close();
 
-        // fix cursor position only after close has been called
-        var lastSnippetLine = origLine + lines.length,
-            cursorLine      = lineBreakAfter ? lastSnippetLine - 1 : lastSnippetLine,
-            cursorCh        = this.originalCursorPosition.ch,
-            cursorLineStart = { line: cursorLine, ch: 0 },
-            cursorLineEnd   = { line: cursorLine, ch: 999 };
+        // check if there's a three-dot mark in the snippet and put a cursor there if there's one
+        if (snippetCursorLine !== null) {
 
-        // if cursorLine is empty, make sure it contains enough whitespace to preserve indentation
-        var cursorLineContent = doc.getRange(cursorLineStart, cursorLineEnd);
-        if (cursorLineContent.match(/^\s*$/) && cursorLineContent !== indent) {
-            doc.replaceRange(indent, cursorLineStart, cursorLineEnd);
+            if (lineBreakBefore) { snippetCursorLine++; }
+            this.hostEditor.setCursorPos(origLine + snippetCursorLine, snippetCursorCh);
+
+        } else {
+
+            // fix cursor position only after close has been called
+            var lastSnippetLine = origLine + lines.length,
+                cursorLine      = lineBreakAfter ? lastSnippetLine - 1 : lastSnippetLine,
+                cursorCh        = this.originalCursorPosition.ch,
+                cursorLineStart = { line: cursorLine, ch: 0 },
+                cursorLineEnd   = { line: cursorLine, ch: 999 };
+
+            // if cursorLine is empty, make sure it contains enough whitespace to preserve indentation
+            var cursorLineContent = doc.getRange(cursorLineStart, cursorLineEnd);
+            if (cursorLineContent.match(/^\s*$/) && cursorLineContent !== indent) {
+                doc.replaceRange(indent, cursorLineStart, cursorLineEnd);
+            }
+
+            this.hostEditor.setCursorPos(cursorLine, cursorCh);
+
         }
-
-        this.hostEditor.setCursorPos(cursorLine, cursorCh);
     };
 
     function triggerWidget() {
