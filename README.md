@@ -2,7 +2,7 @@
 
 Snippets extension for Brackets
 
-Default shortcut to launch is Ctrl+Alt+Space
+Default shortcut to launch is Ctrl+Alt+Space (Cmd-Ctrl-Space for Mac)
 
 See [CHANGELOG](CHANGELOG.md) for latest news on features/fixes.
 

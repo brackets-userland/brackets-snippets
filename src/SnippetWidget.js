@@ -6,6 +6,7 @@ define(function (require, exports) {
         CommandManager    = brackets.getModule("command/CommandManager"),
         EditorManager     = brackets.getModule("editor/EditorManager"),
         KeyBindingManager = brackets.getModule("command/KeyBindingManager"),
+        Menus             = brackets.getModule("command/Menus"),
         InlineWidget      = brackets.getModule("editor/InlineWidget").InlineWidget;
 
     // Local modules
@@ -303,10 +304,21 @@ define(function (require, exports) {
         activeEditor.addInlineWidget(activeEditor.getCursorPos(), sWidget, true);
     }
 
+    function _getTriggerShortcut() {
+        var triggerSnippetShortcut = Preferences.get("triggerSnippetShortcut");
+        if (window.brackets.platform === "mac" && triggerSnippetShortcut.indexOf("Ctrl-Alt-") !== -1) {
+            triggerSnippetShortcut = triggerSnippetShortcut.replace("Ctrl-Alt-", "Cmd-Ctrl-");
+        }
+        return triggerSnippetShortcut;
+    }
+
     function bindShortcut() {
         var TRIGGER_SNIPPET_CMD = "snippets.triggerWidget";
-        CommandManager.register("Trigger Snippet", TRIGGER_SNIPPET_CMD, triggerWidget);
-        KeyBindingManager.addBinding(TRIGGER_SNIPPET_CMD, Preferences.get("triggerSnippetShortcut"));
+        CommandManager
+            .register("Trigger Snippet", TRIGGER_SNIPPET_CMD, triggerWidget);
+        Menus
+            .getMenu(Menus.AppMenuBar.EDIT_MENU)
+            .addMenuItem(TRIGGER_SNIPPET_CMD, _getTriggerShortcut());
     }
 
     function init() {
