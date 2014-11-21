@@ -13,7 +13,7 @@ define(function (require, exports) {
         return new Error(err);
     }
 
-    function show(err) {
+    function show(err, errTitle) {
         err = toError(err);
 
         // add to console too
@@ -22,7 +22,7 @@ define(function (require, exports) {
         // display a dialog for the user
         var dialog = Dialogs.showModalDialog(
             DefaultDialogs.DIALOG_ID_ERROR,
-            Strings.ERROR,
+            errTitle || Strings.ERROR,
             err.stack || err.message
         );
 

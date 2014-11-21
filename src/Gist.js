@@ -8,12 +8,14 @@ define(function (require, exports) {
         NativeApp       = brackets.getModule("utils/NativeApp");
 
     // Local modules
-    var Preferences = require("src/Preferences"),
-        Snippets    = require("src/Snippets"),
-        Strings     = require("strings");
+    var ErrorHandler  = require("src/ErrorHandler"),
+        Preferences   = require("src/Preferences"),
+        Snippets      = require("src/Snippets"),
+        Strings       = require("strings");
 
     // Constants
-    var DEFAULT_GIST_DESCRIPTION = "My code snippets for Brackets (created using https://github.com/zaggino/brackets-snippets)";
+    var DEFAULT_GIST_DESCRIPTION  = "My code snippets for Brackets (created using https://github.com/zaggino/brackets-snippets)",
+        GITHUB_API_SERVER         = "https://api.github.com";
 
     // Variables
     var githubToken;
@@ -21,11 +23,7 @@ define(function (require, exports) {
     function _authorize() {
         githubToken = Preferences.get("githubToken");
         if (!githubToken) {
-            Dialogs.showModalDialog(
-                DefaultDialogs.DIALOG_ID_ERROR,
-                Strings.ERROR,
-                Strings.ERROR_TOKEN_REQUIRED
-            );
+            ErrorHandler.show(Strings.ERROR_TOKEN_REQUIRED);
             return false;
         }
         return true;
@@ -35,7 +33,7 @@ define(function (require, exports) {
         var defer = $.Deferred();
 
         $.ajax({
-            url: "https://api.github.com/gists",
+            url: GITHUB_API_SERVER + "/gists",
             type: "GET",
             dataType: "json",
             cache: false,
@@ -52,11 +50,7 @@ define(function (require, exports) {
 
         })
         .fail(function (err, errdesc, statusText) {
-            Dialogs.showModalDialog(
-                DefaultDialogs.DIALOG_ID_ERROR,
-                statusText,
-                err.responseText
-            );
+            ErrorHandler.show(err.responseText, statusText);
             defer.reject(err);
         });
 
@@ -76,7 +70,7 @@ define(function (require, exports) {
             }
         };
 
-        var url = "https://api.github.com/gists",
+        var url = GITHUB_API_SERVER + "/gists",
             type = "POST";
 
         if (existingGist) {
@@ -112,15 +106,20 @@ define(function (require, exports) {
             defer.resolve(data);
         })
         .fail(function (err, errdesc, statusText) {
-            Dialogs.showModalDialog(
-                DefaultDialogs.DIALOG_ID_ERROR,
-                statusText,
-                err.responseText
-            );
+            ErrorHandler.show(err.responseText, statusText);
             defer.reject(err);
         });
 
         return defer.promise();
+    }
+
+    function _parseSnippetsFromGist(gist) {
+        return Object.keys(gist.files).map(function (name) {
+            return {
+                name: name,
+                template: gist.files[name].content
+            };
+        });
     }
 
     function _downloadGist(url) {
@@ -136,28 +135,68 @@ define(function (require, exports) {
             }
         })
         .done(function (data) {
-            var snippets = Object.keys(data.files).map(function (name) {
-                return {
-                    name: name,
-                    template: data.files[name].content
-                };
-            });
-            defer.resolve(snippets);
+            if (Array.isArray(data)) {
+
+                var snippets = [],
+                    finish = _.after(data.length, function () {
+                        defer.resolve(snippets);
+                    });
+
+                data.forEach(function (d) {
+                    _downloadGist(d.url).done(function (s) {
+                        snippets = snippets.concat(s);
+                        finish();
+                    });
+                });
+
+            } else {
+                defer.resolve(_parseSnippetsFromGist(data));
+            }
         })
         .fail(function (err, errdesc, statusText) {
-            Dialogs.showModalDialog(
-                DefaultDialogs.DIALOG_ID_ERROR,
-                statusText,
-                err.responseText
-            );
+            ErrorHandler.show(err.responseText, statusText);
             defer.reject(err);
         });
 
         return defer.promise();
     }
 
+    function _parseGistId(url) {
+        var m = url.match(/gist\.github\.com\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)/);
+        return (m && m[2] !== "public") ? m[2] : null;
+    }
+
+    function _parseGistUser(url) {
+        var m = url.match(/gist\.github\.com\/([a-zA-Z0-9]+)/);
+        return m ? m[1] : null;
+    }
+
+    function downloadFirst(url) {
+        var defer = $.Deferred();
+
+        if (!_authorize()) {
+            defer.reject();
+        }
+
+        var gistId = _parseGistId(url);
+        if (gistId) {
+            return _downloadGist(GITHUB_API_SERVER + "/gists/" + gistId).done(function (snippets) {
+                return snippets[0];
+            });
+        } else {
+            ErrorHandler.show("No id found in URL: " + url);
+            defer.reject();
+        }
+
+        return defer.promise();
+    }
+
     function downloadAll(url, options) {
         var defer = $.Deferred();
+
+        if (!_authorize()) {
+            defer.reject();
+        }
 
         var finish = function (url) {
             _downloadGist(url)
@@ -189,23 +228,31 @@ define(function (require, exports) {
                 });
         };
 
-        if (!_authorize()) {
-            defer.reject();
-        }
-
         if (url) {
-            finish(url);
+            // should be able to handle:
+            // https://gist.github.com/zaggino/61ae7090b1d9e67ea013
+            // https://gist.github.com/zaggino/public
+            // https://gist.github.com/zaggino
+            var gistId = _parseGistId(url);
+            if (gistId) {
+                finish(GITHUB_API_SERVER + "/gists/" + gistId);
+            } else {
+                var gistUser = _parseGistUser(url);
+                if (gistUser) {
+                    finish(GITHUB_API_SERVER + "/users/" + gistUser + "/gists");
+                } else {
+                    ErrorHandler.show("Can't download gists from URL: " + url);
+                    defer.reject();
+                }
+            }
+
         } else {
             _findGist().done(function (found) {
 
                 if (found) {
                     finish(found.url);
                 } else {
-                    Dialogs.showModalDialog(
-                        DefaultDialogs.DIALOG_ID_ERROR,
-                        Strings.ERROR,
-                        Strings.ERROR_DEFAULT_GIST_NOTFOUND
-                    );
+                    ErrorHandler.show(Strings.ERROR_DEFAULT_GIST_NOTFOUND);
                     defer.reject();
                 }
 
@@ -239,7 +286,8 @@ define(function (require, exports) {
         return defer.promise();
     }
 
-    exports.downloadAll = downloadAll;
-    exports.uploadAll   = uploadAll;
+    exports.downloadFirst = downloadFirst;
+    exports.downloadAll   = downloadAll;
+    exports.uploadAll     = uploadAll;
 
 });

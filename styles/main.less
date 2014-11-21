@@ -27,6 +27,7 @@
         float: left;
 
         .snippets-list {
+            position: relative; // !important
             border: 1px solid @borderColor;
             max-height: 90px;
             max-width: 218px;
@@ -67,6 +68,8 @@
                 background-color: @codeEditorBackground;
                 border: 1px solid @borderColor;
                 min-height: 106px;
+                max-height: 106px;
+                overflow-y: scroll;
             }
         }
     }

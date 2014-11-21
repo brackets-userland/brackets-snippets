@@ -36,5 +36,6 @@ define({
     SNIPPET_DIRECTORIES:                "Snippet directories",
     SNIPPET_NAME:                       "Snippet Name",
     SPECIFY_DIRECTORY_FULLPATH:         "Specify directory fullPath:",
+    TRIGGER_SNIPPET_MENU_ENTRY:         "Trigger code snippet",
     YES:                                "Yes"
 });

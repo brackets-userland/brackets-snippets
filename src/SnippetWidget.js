@@ -5,7 +5,6 @@ define(function (require, exports) {
     var _                 = brackets.getModule("thirdparty/lodash"),
         CommandManager    = brackets.getModule("command/CommandManager"),
         EditorManager     = brackets.getModule("editor/EditorManager"),
-        KeyBindingManager = brackets.getModule("command/KeyBindingManager"),
         Menus             = brackets.getModule("command/Menus"),
         InlineWidget      = brackets.getModule("editor/InlineWidget").InlineWidget;
 
@@ -163,7 +162,12 @@ define(function (require, exports) {
 
         this.$snippetsList.find(".selected").removeClass("selected");
         if (this.selectedSnippet) {
-            this.$snippetsList.find("[x-snippet-id='" + this.selectedSnippet._id + "']").addClass("selected");
+            var $selected = this.$snippetsList.find("[x-snippet-id='" + this.selectedSnippet._id + "']").addClass("selected");
+            // this will scroll $snippetsList so $selected is in view
+            this.$snippetsList.scrollTop(this.$snippetsList.scrollTop() +
+                                         $selected.position().top -
+                                         this.$snippetsList.height() / 2 +
+                                         $selected.height() / 2);
         }
         this.renderSnippet();
     };
@@ -315,7 +319,7 @@ define(function (require, exports) {
     function bindShortcut() {
         var TRIGGER_SNIPPET_CMD = "snippets.triggerWidget";
         CommandManager
-            .register("Trigger Snippet", TRIGGER_SNIPPET_CMD, triggerWidget);
+            .register(Strings.TRIGGER_SNIPPET_MENU_ENTRY, TRIGGER_SNIPPET_CMD, triggerWidget);
         Menus
             .getMenu(Menus.AppMenuBar.EDIT_MENU)
             .addMenuItem(TRIGGER_SNIPPET_CMD, _getTriggerShortcut());

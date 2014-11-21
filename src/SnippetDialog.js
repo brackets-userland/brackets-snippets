@@ -6,7 +6,7 @@ define(function (require, exports) {
         Dialogs = brackets.getModule("widgets/Dialogs");
 
     // Local modules
-    var ErrorHandler  = require("src/ErrorHandler"),
+    var Gist          = require("src/Gist"),
         Strings       = require("strings"),
         Utils         = require("src/Utils");
 
@@ -45,37 +45,9 @@ define(function (require, exports) {
             Utils.askQuestion(Strings.LOAD_SNIPPET_FROM_GIST, String.ENTER_GIST_URL, "string")
                 .done(function (url) {
 
-                    var m = url.match(/gist\.github\.com\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)/),
-                        gistId = null;
-
-                    if (m) {
-                        gistId = m[2];
-                    }
-
-                    if (!gistId) {
-                        ErrorHandler.show("No gistId found in string: " + url);
-                        return;
-                    }
-
-                    $.ajax({
-                        url: "https://api.github.com/gists/" + gistId,
-                        dataType: "json",
-                        cache: false
-                    })
-                    .done(function (data) {
-
-                        var gistFiles = _.keys(data.files);
-
-                        // take only first file here
-                        var name = gistFiles[0];
-                        var template = data.files[name].content;
-
-                        $snippetName.val(name).trigger("change").focus();
-                        $snippetEditor.val(template).trigger("change");
-
-                    })
-                    .fail(function (err) {
-                        ErrorHandler.show(err);
+                    Gist.downloadFirst(url).done(function (snippet) {
+                        $snippetName.val(snippet.name).trigger("change").focus();
+                        $snippetEditor.val(snippet.template).trigger("change");
                     });
 
                 });
