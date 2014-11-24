@@ -11,7 +11,7 @@
                 // transclude: true,
                 // scope: { customerInfo: "=" },
                 link: function (scope, element, attrs) {
-                    ...
+                    {{!cursor}}
                 }
             };
         });

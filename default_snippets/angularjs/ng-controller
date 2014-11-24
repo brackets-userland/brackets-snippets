@@ -4,7 +4,7 @@
     angular
         .module("{{$1:moduleName}}")
         .controller("{{$2:controllerName}}", function ($scope) {
-            ...
+            {{!cursor}}
         });
     
 }());

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.5 ???
+* Three dot mark (...) for cursor replaced by {{!cursor}}
+
 ## 0.0.4 (24/11/2014)
 * Support for variables in snippets (see angularjs sample snippets).
 * Ability to delete all loaded snippets through shift-click on delete.

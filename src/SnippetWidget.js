@@ -17,7 +17,8 @@ define(function (require, exports) {
 
     // Constants
     var WIDGET_HEIGHT        = 150,
-        CODEFONT_WIDTH_IN_PX = 8;
+        CODEFONT_WIDTH_IN_PX = 8,
+        CURSOR_MARK          = "{{!cursor}}";
 
     // Templates
     var snippetWidgetTemplate     = require("text!templates/SnippetWidget.html"),
@@ -329,11 +330,11 @@ define(function (require, exports) {
         textToInsert = lines.map(function (line, index) {
             line = indent + line;
             // check if cursor belongs here
-            var cio = line.indexOf("...");
+            var cio = line.indexOf(CURSOR_MARK);
             if (cio !== -1) {
                 snippetCursorLine = index;
                 snippetCursorCh = cio;
-                line = line.replace("...", "");
+                line = line.replace(CURSOR_MARK, "");
             }
             return line;
         }).join("\n");
