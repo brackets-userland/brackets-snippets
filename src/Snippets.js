@@ -28,7 +28,13 @@ define(function (require, exports, module) {
     }
 
     function _persistSnippets() {
-        Preferences.set("SnippetCollection", SnippetCollection);
+        Preferences.set("SnippetCollection", _.filter(SnippetCollection, function (snippet) {
+
+            // do not store directory snippets in brackets cache, let them load from disk on every startup
+            if (snippet.source === "directory") { return false; }
+
+            return true;
+        }));
     }
 
     function loadSnippet(snippet) {
