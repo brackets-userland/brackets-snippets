@@ -134,12 +134,33 @@ define(function (require, exports) {
         });
 
         // event for resizing variable inputs
-        this.$currentSnippetArea.on("keypress", ".variable", function () {
-            var $this = $(this),
-                val = $this.val();
-            $this.width((val.length + 1) * CODEFONT_WIDTH_IN_PX);
-            $this.removeClass("required");
-        });
+        var resizeInput = function ($input, length) {
+            $input.width(length * CODEFONT_WIDTH_IN_PX);
+            $input.removeClass("required");
+        };
+        this.$currentSnippetArea
+            .on("keypress", ".variable", function () {
+                var $this = $(this),
+                    val = $this.val();
+                resizeInput($this, val.length + 1);
+            })
+            .on("blur", ".variable", function () {
+                var $this = $(this),
+                    val = $this.val();
+                resizeInput($this, val.length);
+            })
+            .on("keyup", ".variable", function () {
+                var that = this,
+                    $this = $(this),
+                    newValue = $this.val(),
+                    num = $this.attr("x-var-num"),
+                    $siblings = self.$currentSnippetArea.find("[x-var-num='" + num + "']");
+                $siblings.each(function () {
+                    if (this !== that) {
+                        $(this).val(newValue).trigger("blur");
+                    }
+                });
+            });
     };
 
     SnippetWidget.prototype.refreshSnippets = function (force) {

@@ -32,7 +32,7 @@
     "disallowKeywordsOnNewLine":                    ["else"],
     "requireLineFeedAtFileEnd":                     true,
     "requireCapitalizedConstructors":               true,
-    "safeContextKeyword":                           ["self"],
+    "safeContextKeyword":                           ["self", "that"],
     "disallowYodaConditions":                       true,
     "requireSpaceAfterLineComment":                 true,
 

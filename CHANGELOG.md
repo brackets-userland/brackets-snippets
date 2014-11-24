@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.6 (???)
+* You can now use same variable multiple times in snippet.
+
 ## 0.0.5 (24/11/2014)
 * Three dot mark (...) for cursor replaced by {{!cursor}}
 * Default shortcut changed to Alt-S
