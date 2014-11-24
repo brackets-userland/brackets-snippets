@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.6 (???)
+## 0.0.6 (25/11/2014)
 * You can now use same variable multiple times in snippet.
 * Ability to delete custom snippet directories.
 * Directory snippets are no longer persisted into Brackets cache.
