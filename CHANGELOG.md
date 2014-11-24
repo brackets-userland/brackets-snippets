@@ -4,6 +4,7 @@
 * You can now use same variable multiple times in snippet.
 * Ability to delete custom snippet directories.
 * Directory snippets are no longer persisted into Brackets cache.
+* Directory snippets edits are now written to the disk.
 
 ## 0.0.5 (24/11/2014)
 * Three dot mark (...) for cursor replaced by {{!cursor}}

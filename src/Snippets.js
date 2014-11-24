@@ -188,7 +188,8 @@ define(function (require, exports, module) {
                             loadSnippet({
                                 name: snippetFile.name,
                                 template: content,
-                                source: "directory"
+                                source: "directory",
+                                snippetFilePath: snippetFile.fullPath
                             });
                         });
                     });
@@ -247,9 +248,26 @@ define(function (require, exports, module) {
     }
 
     function editSnippetDialog(snippet) {
+        var isDirectorySnippet = snippet.source === "directory";
         return SnippetDialog.show(snippet).done(function (newSnippet) {
-            newSnippet.source = "user";
-            updateSnippet(newSnippet);
+            if (isDirectorySnippet) {
+                FileSystem.resolve(snippet.snippetFilePath, function (err, file) {
+                    if (err) {
+                        ErrorHandler.show(err);
+                        return;
+                    }
+                    file.write(newSnippet.template, function (err) {
+                        if (err) {
+                            ErrorHandler.show(err);
+                            return;
+                        }
+                        updateSnippet(newSnippet);
+                    });
+                });
+            } else {
+                newSnippet.source = "user";
+                updateSnippet(newSnippet);
+            }
         });
     }
 
