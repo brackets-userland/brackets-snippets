@@ -1,7 +1,8 @@
 # Changelog
 
-## 0.0.5 ???
+## 0.0.5 (24/11/2014)
 * Three dot mark (...) for cursor replaced by {{!cursor}}
+* Default shortcut changed to Alt-S
 
 ## 0.0.4 (24/11/2014)
 * Support for variables in snippets (see angularjs sample snippets).

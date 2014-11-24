@@ -7,7 +7,7 @@ define(function (require, exports, module) {
         prefix              = "brackets-snippets";
 
     var defaultPreferences = {
-        "triggerSnippetShortcut": {                  "type": "string",            "value": "Ctrl-Alt-Space"      },
+        "triggerSnippetShortcut": {                  "type": "string",            "value": "Alt-S"               },
         "githubLogin": {                             "type": "string",            "value": null                  },
         "githubToken": {                             "type": "string",            "value": null                  },
         "snippetDirectories": {                      "type": "array",             "value": []                    }

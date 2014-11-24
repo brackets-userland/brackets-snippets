@@ -15,6 +15,7 @@ define({
     ERROR_UNKNOWN:                      "Unknown error",
     ERROR_TOKEN_REQUIRED:               "Gist access token is required to use this feature.",
     EXPORT_TO_GIST:                     "Export to Gist",
+    EXTENSION_SHORTCUT:                 "Shortcut to launch snippet widget",
     GIST_AUTH_HINT:                     "You need to create an access token with \"gist\" rights here:",
     GIST_AUTHORIZATION:                 "Gist authorization",
     IMPORT_FROM_GIST:                   "Import from Gist",

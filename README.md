@@ -2,7 +2,9 @@
 
 Snippets extension for Brackets
 
-Default shortcut to launch is Ctrl+Alt+Space (Cmd-Ctrl-Space for Mac)
+Default shortcut to launch is *Alt-S*
+
+You can go to *Edit -> Trigget code snippet* to open the settings dialog and change the shortcut.
 
 See [CHANGELOG](CHANGELOG.md) for latest news on features/fixes.
 

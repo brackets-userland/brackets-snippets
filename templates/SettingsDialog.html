@@ -3,6 +3,15 @@
         <h1 class="dialog-title">{{ Strings.SETTINGS }}</h1>
     </div>
     <div class="modal-body">
+        <div class="section-header">{{ Strings.EXTENSION_SHORTCUT }}</div>
+        <div class="form-horizontal">
+            <div class="control-group">
+                <input class="full-width" name="extension-shortcut" x-preference="triggerSnippetShortcut" type="text" />
+            </div>
+        </div>
+
+        <hr>
+
         <div class="section-header">{{ Strings.GIST_AUTHORIZATION }}</div>
         <p>
             {{ Strings.GIST_AUTH_HINT }}

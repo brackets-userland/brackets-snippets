@@ -35,6 +35,16 @@ define(function (require, exports) {
         if (githubLogin && githubToken) {
             _connectMessage(Strings.MSG_CONNECTED_AS + " " + githubLogin, true);
         }
+
+        $dialog.find("[x-preference]").each(function () {
+            var $this     = $(this),
+                prefName  = $this.attr("x-preference"),
+                prefVal   = Preferences.get(prefName);
+            $this.val(prefVal);
+            $this.on("change", function () {
+                Preferences.set(prefName, $this.val());
+            });
+        });
     }
 
     function _attachEvents() {
