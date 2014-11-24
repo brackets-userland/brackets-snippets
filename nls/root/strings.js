@@ -1,7 +1,6 @@
 /*jshint maxlen:false */
 
 define({
-    ADD_SNIPPET_DIRECTORY:              "Add snippet directory",
     CANCEL:                             "Cancel",
     CLEAR:                              "Clear",
     CLOSE:                              "Close",
@@ -36,6 +35,9 @@ define({
     SNIPPET_DELETE_ALL_CONFIRM:         "Do you really wish to delete ALL snippets?",
     SNIPPET_DIALOG:                     "Snippet Dialog",
     SNIPPET_DIRECTORIES:                "Snippet directories",
+    SNIPPET_DIRECTORY_ADD:              "Add snippet directory",
+    SNIPPET_DIRECTORY_DELETE:           "Delete snippet directory",
+    SNIPPET_DIRECTORY_DELETE_CONFIRM:   "Do you really wish to delete this snippet directory?",
     SNIPPET_NAME:                       "Snippet Name",
     SPECIFY_DIRECTORY_FULLPATH:         "Specify directory fullPath:",
     TRIGGER_SNIPPET_MENU_ENTRY:         "Trigger code snippet",

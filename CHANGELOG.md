@@ -2,6 +2,7 @@
 
 ## 0.0.6 (???)
 * You can now use same variable multiple times in snippet.
+* Ability to delete custom snippet directories.
 
 ## 0.0.5 (24/11/2014)
 * Three dot mark (...) for cursor replaced by {{!cursor}}

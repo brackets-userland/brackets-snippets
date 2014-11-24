@@ -124,7 +124,7 @@ define(function (require, exports) {
 
         $dialog.on("change", ".snippet-directory-entry-autoload", function () {
             var $this               = $(this),
-                fullPath            = $this.parent().attr("x-fullpath"),
+                fullPath            = $this.parents("[x-fullpath]").first().attr("x-fullpath"),
                 snippetDirectories  = Preferences.get("snippetDirectories");
 
             var sd = _.find(snippetDirectories, function (d) {
@@ -135,8 +135,27 @@ define(function (require, exports) {
             Preferences.set("snippetDirectories", snippetDirectories);
         });
 
+        $dialog.on("click", ".snippet-directory-entry-delete", function () {
+            var $this               = $(this),
+                fullPath            = $this.parents("[x-fullpath]").first().attr("x-fullpath"),
+                snippetDirectories  = Preferences.get("snippetDirectories");
+
+            Utils.askQuestion(Strings.SNIPPET_DIRECTORY_DELETE, Strings.SNIPPET_DIRECTORY_DELETE_CONFIRM, "boolean")
+                .done(function (answer) {
+                    if (answer === true) {
+                        var sd = _.find(snippetDirectories, function (d) {
+                            return d.fullPath === fullPath;
+                        });
+                        snippetDirectories = _.without(snippetDirectories, sd);
+
+                        Preferences.set("snippetDirectories", snippetDirectories);
+                        $this.parents("[x-fullpath]").remove();
+                    }
+                });
+        });
+
         $dialog.on("click", ".btn-add-snippet-directory", function () {
-            Utils.askQuestion(Strings.ADD_SNIPPET_DIRECTORY, Strings.SPECIFY_DIRECTORY_FULLPATH, "string")
+            Utils.askQuestion(Strings.SNIPPET_DIRECTORY_ADD, Strings.SPECIFY_DIRECTORY_FULLPATH, "string")
                 .done(function (fullPath) {
                     var snippetDirectories = Preferences.get("snippetDirectories");
                     snippetDirectories.push({
@@ -152,8 +171,23 @@ define(function (require, exports) {
     function show() {
         defer = $.Deferred();
 
+        var sd = Preferences.get("snippetDirectories").map(function (d) {
+            var lookedFor = "zaggino.brackets-snippets/default_snippets",
+                io = d.fullPath.indexOf(lookedFor);
+
+            if (io !== -1) {
+                d.fullPathDisplay = d.fullPath.substring(io + "zaggino.brackets-snippets/".length);
+                d.isDefault = true;
+            } else {
+                d.fullPathDisplay = d.fullPath;
+                d.isDefault = false;
+            }
+
+            return d;
+        });
+
         var templateArgs = {
-            SnippetDirectories: Preferences.get("snippetDirectories"),
+            SnippetDirectories: sd,
             Strings: Strings
         };
 

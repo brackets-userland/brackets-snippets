@@ -34,13 +34,29 @@
         <hr>
 
         <div class="section-header">{{ Strings.SNIPPET_DIRECTORIES }}</div>
-        {{ #SnippetDirectories }}
-            <div class="snippet-directory-entry" x-fullpath="{{ fullPath }}">
-                <input class="snippet-directory-entry-autoload" type="checkbox" {{#autoLoad}}checked="checked"{{/autoLoad}} />
-                {{ fullPath }}
-            </div>
-        {{ /SnippetDirectories }}
-        <button class="btn btn-add-snippet-directory">{{ Strings.ADD_SNIPPET_DIRECTORY }}</button>
+        <table class="table table-bordered table-striped table-hover table-condensed">
+            <colgroup>
+                <col span="1" width="25" />
+                <col span="1" width="25" />
+                <col span="1" width="*" />
+            </colgroup>
+            {{ #SnippetDirectories }}
+                <tr class="snippet-directory-entry" x-fullpath="{{ fullPath }}">
+                    <td class="text-center">
+                        <input class="snippet-directory-entry-autoload" type="checkbox" {{#autoLoad}}checked="checked"{{/autoLoad}} />
+                    </td>
+                    <td class="text-center">
+                        {{ ^isDefault }}
+                            <span class="snippet-directory-entry-delete">&times;</span>
+                        {{ /isDefault }}
+                    </td>
+                    <td class="snippet-directory-fullpath" title="{{ fullPath }}">
+                        {{ fullPathDisplay }}
+                    </td>
+                </tr>
+            {{ /SnippetDirectories }}
+        </table>
+        <button class="btn btn-add-snippet-directory">{{ Strings.SNIPPET_DIRECTORY_ADD }}</button>
     </div>
     <div class="modal-footer">
         <button class="btn left btn-gist-import">{{ Strings.IMPORT_FROM_GIST }}</button>
