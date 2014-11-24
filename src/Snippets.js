@@ -248,13 +248,23 @@ define(function (require, exports, module) {
             });
     }
 
-    exports.init                  = init;
-    exports.clearAll              = clearAll;
-    exports.getAll                = getAll;
-    exports.loadSnippet           = loadSnippet;
-    exports.search                = search;
-    exports.addNewSnippetDialog   = addNewSnippetDialog;
-    exports.editSnippetDialog     = editSnippetDialog;
-    exports.deleteSnippetDialog   = deleteSnippetDialog;
+    function deleteAllSnippetsDialog() {
+        return Utils.askQuestion(Strings.QUESTION, Strings.SNIPPET_DELETE_ALL_CONFIRM, "boolean")
+            .done(function (response) {
+                if (response === true) {
+                    clearAll();
+                }
+            });
+    }
+
+    exports.init                    = init;
+    exports.clearAll                = clearAll;
+    exports.getAll                  = getAll;
+    exports.loadSnippet             = loadSnippet;
+    exports.search                  = search;
+    exports.addNewSnippetDialog     = addNewSnippetDialog;
+    exports.editSnippetDialog       = editSnippetDialog;
+    exports.deleteSnippetDialog     = deleteSnippetDialog;
+    exports.deleteAllSnippetsDialog = deleteAllSnippetsDialog;
 
 });

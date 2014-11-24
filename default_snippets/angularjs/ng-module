@@ -2,7 +2,7 @@
     "use strict";
 
     angular
-        .module("moduleName", [])
+        .module("{{$1:moduleName}}", [])
         .config(function () {
             ...
         })

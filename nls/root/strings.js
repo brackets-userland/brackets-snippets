@@ -32,6 +32,7 @@ define({
     QUESTION:                           "Question",
     SETTINGS:                           "Settings",
     SNIPPET_DELETE_CONFIRM:             "Do you really wish to delete this snippet?",
+    SNIPPET_DELETE_ALL_CONFIRM:         "Do you really wish to delete ALL snippets?",
     SNIPPET_DIALOG:                     "Snippet Dialog",
     SNIPPET_DIRECTORIES:                "Snippet directories",
     SNIPPET_NAME:                       "Snippet Name",

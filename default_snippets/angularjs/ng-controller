@@ -2,8 +2,8 @@
     "use strict";
 
     angular
-        .module("moduleName")
-        .controller("controllerName", function ($scope) {
+        .module("{{$1:moduleName}}")
+        .controller("{{$2:controllerName}}", function ($scope) {
             ...
         });
     

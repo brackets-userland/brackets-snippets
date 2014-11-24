@@ -2,8 +2,8 @@
     "use strict";
 
     angular
-        .module("moduleName")
-        .directive("directiveName", function () {
+        .module("{{$1:moduleName}}")
+        .directive("{{$2:directiveName}}", function () {
             return {
                 restrict: "AEC",
                 // template: "Name: {{customer.name}} Address: {{customer.address}}",

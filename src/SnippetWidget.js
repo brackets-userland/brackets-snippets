@@ -16,7 +16,8 @@ define(function (require, exports) {
         Strings         = require("strings");
 
     // Constants
-    var WIDGET_HEIGHT = 150;
+    var WIDGET_HEIGHT        = 150,
+        CODEFONT_WIDTH_IN_PX = 8;
 
     // Templates
     var snippetWidgetTemplate     = require("text!templates/SnippetWidget.html"),
@@ -118,13 +119,25 @@ define(function (require, exports) {
         });
 
         // event for snippet deleting
-        this.$deleteSnippetBtn.on("click", function () {
+        this.$deleteSnippetBtn.on("click", function (e) {
+            if (e.shiftKey) {
+                Snippets.deleteAllSnippetsDialog().done(refresh);
+                return;
+            }
             Snippets.deleteSnippetDialog(self.selectedSnippet).done(refresh);
         });
 
         // event for settings dialog
         this.$htmlContent.find(".snippets-settings").on("click", function () {
             SettingsDialog.show().done(refresh);
+        });
+
+        // event for resizing variable inputs
+        this.$currentSnippetArea.on("keypress", ".variable", function () {
+            var $this = $(this),
+                val = $this.val();
+            $this.width((val.length + 1) * CODEFONT_WIDTH_IN_PX);
+            $this.removeClass("required");
         });
     };
 
@@ -207,15 +220,75 @@ define(function (require, exports) {
         this.$editSnippetBtn.prop("disabled", !isSnippetSelected);
         this.$deleteSnippetBtn.prop("disabled", !isSnippetSelected);
 
-        if (isSnippetSelected) {
-            $snippetName.text(this.selectedSnippet.name);
-            $pre.text(this.selectedSnippet.template);
-        } else {
+        if (!isSnippetSelected) {
             $snippetName.text(Strings.NO_SNIPPET_SELECTED);
+            return;
         }
+
+        $snippetName.text(this.selectedSnippet.name);
+
+        var escaped = _.escape(this.selectedSnippet.template),
+            variables = escaped.match(/\{\{\$[^\}]+\}\}/g);
+
+        if (variables) {
+            variables.forEach(function (variable) {
+                var m = variable.match(/\{\{\$([0-9]+)\:([a-zA-Z0-9]+)/),
+                    num = m[1],
+                    name = m[2],
+                    magicConstant = 2, // don't ask
+                    w = magicConstant + (name.length * CODEFONT_WIDTH_IN_PX) + "px";
+                var inputHtml = "<input class='variable' type='text'" +
+                                " x-var-num='" + num + "'" +
+                                " placeholder='" + name + "'" +
+                                " style='width:" + w + "' />";
+                escaped = escaped.replace(variable, inputHtml);
+            });
+        }
+
+        $pre.html(escaped);
+    };
+
+    SnippetWidget.prototype.hasUnfilledVariables = function () {
+        var $inputs = this.$currentSnippetArea.find(":input");
+        if ($inputs.length === 0) { return false; }
+
+        // find first empty input and focus there
+        for (var i = 0; i < $inputs.length; i++) {
+            var $input = $($inputs[i]);
+            if ($input.val().length === 0) {
+                if ($input.is(":focus")) {
+                    $input.addClass("required");
+                }
+                $input.focus();
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    SnippetWidget.prototype.fillVariablesFromInputs = function (text) {
+        var variables = text.match(/\{\{\$[^\}]+\}\}/g);
+        if (!variables) { return text; }
+
+        variables.forEach(function (variable) {
+
+            var m = variable.match(/\{\{\$([0-9]+)\:([a-zA-Z0-9]+)/),
+                num = m[1],
+                $input = this.$currentSnippetArea.find("[x-var-num='" + num + "']");
+
+            text = text.replace(variable, $input.val());
+
+        }, this);
+
+        return text;
     };
 
     SnippetWidget.prototype.insertSnippet = function () {
+        if (this.hasUnfilledVariables()) {
+            return;
+        }
+
         var doc               = this.hostEditor.document,
             textToInsert      = this.selectedSnippet.template,
             origLine          = this.originalCursorPosition.line,
@@ -223,6 +296,8 @@ define(function (require, exports) {
             positionEnd       = { line: origLine, ch: 999 },
             snippetCursorLine = null,
             snippetCursorCh   = null;
+
+        textToInsert = this.fillVariablesFromInputs(textToInsert);
 
         var currentLine     = doc.getRange(positionStart, positionEnd),
             nextLine        = doc.getRange(
