@@ -21,6 +21,12 @@ define(function (require, exports, module) {
     var SnippetCollection = [],
         lastSnippetId = 0;
 
+    function _sortSnippets() {
+        SnippetCollection.sort(function (a, b) {
+            return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+        });
+    }
+
     function _persistSnippets() {
         Preferences.set("SnippetCollection", SnippetCollection);
     }
@@ -72,6 +78,7 @@ define(function (require, exports, module) {
         // every snippets needs to have an unique generated ID
         snippet._id = ++lastSnippetId;
         SnippetCollection.push(snippet);
+        _sortSnippets();
         _persistSnippets();
     }
 
@@ -82,6 +89,7 @@ define(function (require, exports, module) {
         Object.keys(newSnippet).forEach(function (key) {
             oldSnippet[key] = newSnippet[key];
         });
+        _sortSnippets();
         _persistSnippets();
     }
 

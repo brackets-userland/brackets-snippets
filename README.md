@@ -14,6 +14,7 @@ Available to install from Brackets inbuilt [extension registry](https://brackets
 - Default Snippets support (v0.0.2)
 - Loading Snippets from directories (v0.0.2)
 - Set cursor position after inserting a snippet with three dot mark (...) (v0.0.2)
+- Support for variables in snippets (v0.0.4)
 
 ###Creating own snippet
 

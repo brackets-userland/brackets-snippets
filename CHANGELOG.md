@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.4 (24/11/2014)
+* Support for variables in snippets (see angularjs sample snippets).
+* Ability to delete all loaded snippets through shift-click on delete.
+* Snippets are now alphabetically sorted.
+
 ## 0.0.3 (21/11/2014)
 * Shortcut for Mac should be now Cmd-Ctrl-Space.
 * Fixed some issues when importing snippets from Gist.
