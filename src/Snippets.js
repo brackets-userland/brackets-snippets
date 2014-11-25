@@ -13,13 +13,18 @@ define(function (require, exports, module) {
         Strings       = require("strings"),
         Utils         = require("src/Utils");
 
+    // Local variables
+    var SnippetCollection = [],
+        lastSnippetId = 0;
+
     // src https://developer.mozilla.org/en/docs/Web/JavaScript/Guide/Regular_Expressions
     function escapeRegExp(string) {
         return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
     }
 
-    var SnippetCollection = [],
-        lastSnippetId = 0;
+    function _getDefaultSnippetDirectory() {
+        return brackets.app.getApplicationSupportDirectory() + "/snippets/";
+    }
 
     function _sortSnippets() {
         SnippetCollection.sort(function (a, b) {
@@ -27,16 +32,7 @@ define(function (require, exports, module) {
         });
     }
 
-    function _persistSnippets() {
-        Preferences.set("SnippetCollection", _.filter(SnippetCollection, function (snippet) {
-
-            // do not store directory snippets in brackets cache, let them load from disk on every startup
-            if (snippet.source === "directory") { return false; }
-
-            return true;
-        }));
-    }
-
+    // TODO: re-analyze now that user and gist snippets are no more
     function loadSnippet(snippet) {
         // snippet.source === "directory"
         // snippet.source === "user";
@@ -85,9 +81,10 @@ define(function (require, exports, module) {
         snippet._id = ++lastSnippetId;
         SnippetCollection.push(snippet);
         _sortSnippets();
-        _persistSnippets();
     }
 
+    // TODO: will we allow updating the names?
+    // TODO: make sure users don't update default_snippets
     function updateSnippet(newSnippet) {
         var oldSnippet = _.find(SnippetCollection, function (s) {
             return s._id === newSnippet._id;
@@ -96,9 +93,9 @@ define(function (require, exports, module) {
             oldSnippet[key] = newSnippet[key];
         });
         _sortSnippets();
-        _persistSnippets();
     }
 
+    // TODO: reimplement to work with default snippet directory
     function deleteSnippet(snippet) {
         var idx = SnippetCollection.length;
         while (idx--) {
@@ -106,14 +103,13 @@ define(function (require, exports, module) {
                 SnippetCollection.splice(idx, 1);
             }
         }
-        _persistSnippets();
     }
 
+    // TODO: reimplement to work with default snippet directory
     function clearAll() {
         while (SnippetCollection.length > 0) {
             SnippetCollection.splice(0, 1);
         }
-        _persistSnippets();
     }
 
     function _registerSnippetDirectory(directory) {
@@ -234,10 +230,6 @@ define(function (require, exports, module) {
         return defer.promise();
     }
 
-    function _getDefaultSnippetDirectory() {
-        return brackets.app.getApplicationSupportDirectory() + "/snippets/";
-    }
-
     function ensureDefaultSnippetDirectory() {
         var defer = $.Deferred();
 
@@ -292,6 +284,7 @@ define(function (require, exports, module) {
             });
     }
 
+    // TODO: we need a migration for Preferences.get("SnippetsCollection") into default snippets directory
     function init() {
         ensureDefaultSnippetDirectory()
             .done(function () {
@@ -362,6 +355,7 @@ define(function (require, exports, module) {
         });
     }
 
+    // TODO: what about renames?
     function editSnippetDialog(snippet) {
         var isDirectorySnippet = snippet.source === "directory";
 
