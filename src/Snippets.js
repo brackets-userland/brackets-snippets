@@ -22,14 +22,14 @@ define(function (require, exports, module) {
         return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
     }
 
-    function _getDefaultSnippetDirectory() {
-        return brackets.app.getApplicationSupportDirectory() + "/snippets/";
-    }
-
     function _sortSnippets() {
         SnippetCollection.sort(function (a, b) {
             return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
         });
+    }
+
+    function getDefaultSnippetDirectory() {
+        return brackets.app.getApplicationSupportDirectory() + "/snippets/";
     }
 
     // TODO: re-analyze now that user and gist snippets are no more
@@ -235,7 +235,7 @@ define(function (require, exports, module) {
 
         var defaultSnippetDirectory = Preferences.get("defaultSnippetDirectory");
         if (!defaultSnippetDirectory) {
-            defaultSnippetDirectory = _getDefaultSnippetDirectory();
+            defaultSnippetDirectory = getDefaultSnippetDirectory();
         }
 
         // fix windows paths
@@ -276,7 +276,7 @@ define(function (require, exports, module) {
 
         return defer.promise()
             .fail(function (reason) {
-                Preferences.set("defaultSnippetDirectory", _getDefaultSnippetDirectory());
+                Preferences.set("defaultSnippetDirectory", getDefaultSnippetDirectory());
                 throw reason;
             })
             .done(function () {
@@ -415,14 +415,15 @@ define(function (require, exports, module) {
             });
     }
 
-    exports.init                    = init;
-    exports.clearAll                = clearAll;
-    exports.getAll                  = getAll;
-    exports.loadSnippet             = loadSnippet;
-    exports.search                  = search;
-    exports.addNewSnippetDialog     = addNewSnippetDialog;
-    exports.editSnippetDialog       = editSnippetDialog;
-    exports.deleteSnippetDialog     = deleteSnippetDialog;
-    exports.deleteAllSnippetsDialog = deleteAllSnippetsDialog;
+    exports.init                        = init;
+    exports.clearAll                    = clearAll;
+    exports.getAll                      = getAll;
+    exports.loadSnippet                 = loadSnippet;
+    exports.search                      = search;
+    exports.addNewSnippetDialog         = addNewSnippetDialog;
+    exports.editSnippetDialog           = editSnippetDialog;
+    exports.deleteSnippetDialog         = deleteSnippetDialog;
+    exports.deleteAllSnippetsDialog     = deleteAllSnippetsDialog;
+    exports.getDefaultSnippetDirectory  = getDefaultSnippetDirectory;
 
 });

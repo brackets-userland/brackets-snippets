@@ -7,10 +7,12 @@ define(function (require, exports) {
         NativeApp       = brackets.getModule("utils/NativeApp");
 
     // Local modules
-    var Gist        = require("src/Gist"),
-        Preferences = require("src/Preferences"),
-        Strings     = require("strings"),
-        Utils       = require("src/Utils");
+    var ErrorHandler  = require("src/ErrorHandler"),
+        Gist          = require("src/Gist"),
+        Preferences   = require("src/Preferences"),
+        Snippets      = require("src/Snippets"),
+        Strings       = require("strings"),
+        Utils         = require("src/Utils");
 
     // Templates
     var template = require("text!templates/SettingsDialog.html");
@@ -164,6 +166,25 @@ define(function (require, exports) {
                     });
                     Preferences.set("snippetDirectories", snippetDirectories);
                     dialog.close();
+                });
+        });
+
+        $dialog.on("click", ".open-in-os-btn", function () {
+            var path = Preferences.get("defaultSnippetDirectory");
+            brackets.app.showOSFolder(path, function (err) {
+                if (err) {
+                    ErrorHandler.show(err);
+                }
+            });
+        });
+
+        $dialog.on("click", ".reset-default-directory-btn", function () {
+            var path = Snippets.getDefaultSnippetDirectory();
+            Utils.askQuestion(Strings.RESET_DEFAULT_DIR, Strings.RESET_DEFAULT_DIR_MSG + " " + path, "boolean")
+                .done(function (answer) {
+                    if (answer === true) {
+                        $dialog.find("[x-preference='defaultSnippetDirectory']").val(path).trigger("change");
+                    }
                 });
         });
     }

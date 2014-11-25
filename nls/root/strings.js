@@ -31,6 +31,8 @@ define({
     OK:                                 "OK",
     PERSONAL_TOKEN:                     "Personal access token",
     QUESTION:                           "Question",
+    RESET_DEFAULT_DIR:                  "Reset default snippet directory",
+    RESET_DEFAULT_DIR_MSG:              "Do you really wish to reset the default snippet directory to:",
     SETTINGS:                           "Settings",
     SNIPPET_DELETE_CONFIRM:             "Do you really wish to delete this snippet?",
     SNIPPET_DELETE_ALL_CONFIRM:         "Do you really wish to delete ALL snippets?",
