@@ -302,27 +302,48 @@ define(function (require, exports, module) {
     }
 
     function addNewSnippetDialog(snippet) {
-        return SnippetDialog.show(snippet).done(function (newSnippet) {
+        return SnippetDialog.show(snippet, function (newSnippet) {
+            // dialog should only be closed, if this promise is resolved
+            var defer = $.Deferred();
+
             var newFileName = Preferences.get("defaultSnippetDirectory") + newSnippet.name;
             FileSystem.resolve(newFileName, function (err) {
+
+                // NotFound is desired here, because we should be writing new file to disk
                 if (err === "NotFound") {
                     FileSystem.getFileForPath(newFileName).write(newSnippet.template, function (err) {
+
+                        // error writing the file to disk
                         if (err) {
                             ErrorHandler.show(err);
+                            defer.reject();
                             return;
                         }
+
+                        // successfully saved new snippet to disk
                         newSnippet.source = "directory";
                         newSnippet.snippetFilePath = newFileName;
                         loadSnippet(newSnippet);
+                        defer.resolve();
+
                     });
                     return;
                 }
+
+                // error resolving the file, it may or may not exist
                 if (err) {
                     ErrorHandler.show(err);
+                    defer.reject();
                     return;
                 }
+
+                // no error resolving the file, it already exists
                 ErrorHandler.show("File already exists: " + newFileName);
+                defer.reject();
+
             });
+
+            return defer.promise();
         });
     }
 

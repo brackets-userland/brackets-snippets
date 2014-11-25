@@ -15,10 +15,13 @@ define(function (require, exports) {
 
     // Module variables
     var defer,
-        snippet;
+        dialog,
+        $dialog,
+        snippet,
+        onSuccessBeforeClose;
 
     // Implementation
-    function _attachEvents($dialog) {
+    function _attachEvents() {
         var $snippetName = $dialog.find(".snippet-name"),
             $snippetEditor = $dialog.find(".snippet-editor");
 
@@ -52,6 +55,18 @@ define(function (require, exports) {
 
                 });
         });
+
+        $dialog.find("[data-button-id='ok']").on("click", function (e) {
+            if (onSuccessBeforeClose) {
+                onSuccessBeforeClose(snippet).done(function () {
+                    // this is copied from inside of Brackets on how to close dialog with "ok"
+                    $dialog.data("buttonId", "ok");
+                    $dialog.modal("hide");
+                });
+                e.preventDefault();
+                e.stopImmediatePropagation();
+            }
+        });
     }
 
     function _show() {
@@ -60,9 +75,9 @@ define(function (require, exports) {
             Strings: Strings
         };
 
-        var compiledTemplate = Mustache.render(template, templateArgs),
-            dialog = Dialogs.showModalDialogUsingTemplate(compiledTemplate),
-            $dialog = dialog.getElement();
+        var compiledTemplate = Mustache.render(template, templateArgs);
+        dialog = Dialogs.showModalDialogUsingTemplate(compiledTemplate);
+        $dialog = dialog.getElement();
 
         _attachEvents($dialog);
 
@@ -75,8 +90,9 @@ define(function (require, exports) {
         });
     }
 
-    function show(_snippet) {
-        defer = $.Deferred();
+    function show(_snippet, _onSuccessBeforeClose) {
+        defer                 = $.Deferred();
+        onSuccessBeforeClose  = _onSuccessBeforeClose;
 
         if (typeof _snippet === "object") {
             snippet = _.cloneDeep(_snippet);
