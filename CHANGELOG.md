@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.7 ???
+* Ensures default snippet directory is correctly set on the startup.
+
 ## 0.0.6 (25/11/2014)
 * You can now use same variable multiple times in snippet.
 * Ability to delete custom snippet directories.

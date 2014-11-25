@@ -5,6 +5,7 @@ define({
     CLEAR:                              "Clear",
     CLOSE:                              "Close",
     CONNECT:                            "Connect",
+    DEFAULT_SNIPPET_DIRECTORY:          "Default snippet directory (where new snippets are saved)",
     ENTER_GIST_URL:                     "Enter a Gist url",
     ERROR:                              "Error",
     ERROR_API_REQ_FAIL:                 "API request failed: ",

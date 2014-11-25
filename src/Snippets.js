@@ -221,9 +221,65 @@ define(function (require, exports, module) {
         });
     }
 
+    function _getDefaultSnippetDirectory() {
+        return brackets.app.getApplicationSupportDirectory() + "/snippets/";
+    }
+
+    function ensureDefaultSnippetDirectory() {
+        var defer = $.Deferred();
+
+        var defaultSnippetDirectory = Preferences.get("defaultSnippetDirectory");
+        if (!defaultSnippetDirectory) {
+            defaultSnippetDirectory = _getDefaultSnippetDirectory();
+        }
+
+        // fix windows paths
+        defaultSnippetDirectory = defaultSnippetDirectory.replace(/\\/g, "/");
+
+        FileSystem.resolve(defaultSnippetDirectory, function (err, directory) {
+            // handle NotFound error
+            if (err === "NotFound") {
+                brackets.fs.makedir(defaultSnippetDirectory, parseInt("777", 0), function (err) {
+                    if (err) {
+                        ErrorHandler.show(err);
+                        defer.reject("makedir failed: " + err);
+                        return;
+                    }
+                    defer.resolve(true);
+                });
+                return;
+            }
+            // all other errors
+            if (err) {
+                ErrorHandler.show(err);
+                defer.reject("unknown error: " + err);
+                return;
+            }
+            // exists but it's not a directory
+            if (!directory.isDirectory) {
+                ErrorHandler.show("Target is not a directory: " + defaultSnippetDirectory);
+                defer.reject("default is not a directory");
+                return;
+            }
+            defer.resolve(true);
+        });
+
+        return defer.promise()
+            .fail(function (reason) {
+                Preferences.set("defaultSnippetDirectory", _getDefaultSnippetDirectory());
+                throw reason;
+            })
+            .done(function () {
+                Preferences.set("defaultSnippetDirectory", defaultSnippetDirectory);
+            });
+    }
+
     function init() {
-        loadSnippets();
-        loadDefaultSnippets();
+        ensureDefaultSnippetDirectory()
+            .done(function () {
+                loadSnippets();
+                loadDefaultSnippets();
+            });
     }
 
     function getAll() {
