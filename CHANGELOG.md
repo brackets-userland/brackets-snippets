@@ -2,6 +2,7 @@
 
 ## 0.0.7 ???
 * Ensures default snippet directory is correctly set on the startup.
+* All new snippets are written into current default snippet directory.
 
 ## 0.0.6 (25/11/2014)
 * You can now use same variable multiple times in snippet.

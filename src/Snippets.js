@@ -236,6 +236,11 @@ define(function (require, exports, module) {
         // fix windows paths
         defaultSnippetDirectory = defaultSnippetDirectory.replace(/\\/g, "/");
 
+        // fix missing trailing slash
+        if (defaultSnippetDirectory.slice(-1) !== "/") {
+            defaultSnippetDirectory += "/";
+        }
+
         FileSystem.resolve(defaultSnippetDirectory, function (err, directory) {
             // handle NotFound error
             if (err === "NotFound") {
@@ -298,8 +303,26 @@ define(function (require, exports, module) {
 
     function addNewSnippetDialog(snippet) {
         return SnippetDialog.show(snippet).done(function (newSnippet) {
-            newSnippet.source = "user";
-            loadSnippet(newSnippet);
+            var newFileName = Preferences.get("defaultSnippetDirectory") + newSnippet.name;
+            FileSystem.resolve(newFileName, function (err) {
+                if (err === "NotFound") {
+                    FileSystem.getFileForPath(newFileName).write(newSnippet.template, function (err) {
+                        if (err) {
+                            ErrorHandler.show(err);
+                            return;
+                        }
+                        newSnippet.source = "directory";
+                        newSnippet.snippetFilePath = newFileName;
+                        loadSnippet(newSnippet);
+                    });
+                    return;
+                }
+                if (err) {
+                    ErrorHandler.show(err);
+                    return;
+                }
+                ErrorHandler.show("File already exists: " + newFileName);
+            });
         });
     }
 
