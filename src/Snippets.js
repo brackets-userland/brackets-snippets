@@ -116,13 +116,6 @@ define(function (require, exports, module) {
         _persistSnippets();
     }
 
-    function loadSnippets() {
-        var source = Preferences.get("SnippetCollection") || [];
-        source.forEach(function (snippet) {
-            loadSnippet(snippet);
-        });
-    }
-
     function _registerSnippetDirectory(directory) {
         var snippetDirectories = Preferences.get("snippetDirectories");
 
@@ -141,8 +134,16 @@ define(function (require, exports, module) {
         }
     }
 
-    function _loadSnippetDirectories() {
+    function loadSnippetsFromDirectories() {
         var snippetDirectories = Preferences.get("snippetDirectories");
+
+        // always add defaultSnippetDirectory
+        var defaultSnippetDirectory = Preferences.get("defaultSnippetDirectory");
+        snippetDirectories.push({
+            fullPath: defaultSnippetDirectory,
+            autoLoad: true
+        });
+
         snippetDirectories.forEach(function (snippetDirectory) {
 
             // skip directories we don't want to load on startup
@@ -167,7 +168,7 @@ define(function (require, exports, module) {
                 if (directory.isDirectory !== true) {
                     snippetDirectory.autoLoad = false;
                     Preferences.set("snippetDirectories", snippetDirectories);
-                    ErrorHandler.show("_loadSnippetDirectories: " + snippetDirectory.fullPath + " is not a directory!");
+                    ErrorHandler.show("loadSnippetsFromDirectories: " + snippetDirectory.fullPath + " is not a directory!");
                     return;
                 }
 
@@ -198,27 +199,39 @@ define(function (require, exports, module) {
         });
     }
 
-    function loadDefaultSnippets() {
+    function checkDefaultSnippetsDirectories() {
+        var defer = $.Deferred();
 
         var modulePath = ExtensionUtils.getModulePath(module);
         FileSystem.resolve(modulePath + "../default_snippets/", function (err, entry) {
+
             if (err) {
                 ErrorHandler.show(err);
+                defer.reject();
                 return;
             }
+
             entry.getContents(function (err, contents) {
+
                 if (err) {
                     ErrorHandler.show(err);
+                    defer.reject();
                     return;
                 }
+
                 // register every directory which contains a set of snippets
                 contents.forEach(function (directory) {
                     _registerSnippetDirectory(directory);
                 });
-                // now load all of them
-                _loadSnippetDirectories();
+
+                // finish
+                defer.resolve();
+
             });
+
         });
+
+        return defer.promise();
     }
 
     function _getDefaultSnippetDirectory() {
@@ -282,8 +295,10 @@ define(function (require, exports, module) {
     function init() {
         ensureDefaultSnippetDirectory()
             .done(function () {
-                loadSnippets();
-                loadDefaultSnippets();
+                return checkDefaultSnippetsDirectories();
+            })
+            .done(function () {
+                return loadSnippetsFromDirectories();
             });
     }
 
