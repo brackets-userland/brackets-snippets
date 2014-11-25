@@ -234,7 +234,8 @@ define(function (require, exports) {
     };
 
     SnippetWidget.prototype.renderSnippet = function () {
-        var $snippetName  = this.$currentSnippetArea.children(".snippet-name"),
+        var $snippetName  = this.$currentSnippetArea.find(".snippet-name"),
+            $snippetPath  = this.$currentSnippetArea.find(".snippet-path"),
             $pre          = this.$currentSnippetArea.children("pre"),
             isSnippetSelected = !!this.selectedSnippet;
 
@@ -248,6 +249,7 @@ define(function (require, exports) {
         }
 
         $snippetName.text(this.selectedSnippet.name);
+        $snippetPath.text(this.selectedSnippet.snippetFilePath || "-");
 
         var escaped = _.escape(this.selectedSnippet.template),
             variables = escaped.match(/\{\{\$[^\}]+\}\}/g);

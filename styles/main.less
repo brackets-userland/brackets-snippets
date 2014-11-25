@@ -5,6 +5,7 @@
 @selectedEntry: #e0f0fa;
 @codeEditorBackground: #f8f8f8;
 @colorError: #d9534f;
+@textColor: #535353;
 
 .brackets-snippets-widget {
     position: absolute;
@@ -60,8 +61,25 @@
         .current-snippet {
             margin: 0 1em;
 
-            .snippet-name {
+            .snippet-header {
                 margin-bottom: 0.5em;
+                color: @borderColor;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+
+                .snippet-name {
+                    color: @textColor;
+                }
+
+                .snippet-path {
+                    &::before {
+                        content: "(";
+                    }
+                    &::after {
+                        content: ")";
+                    }
+                }
             }
 
             pre {
