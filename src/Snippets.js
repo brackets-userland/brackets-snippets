@@ -349,25 +349,42 @@ define(function (require, exports, module) {
 
     function editSnippetDialog(snippet) {
         var isDirectorySnippet = snippet.source === "directory";
-        return SnippetDialog.show(snippet).done(function (newSnippet) {
-            if (isDirectorySnippet) {
-                FileSystem.resolve(snippet.snippetFilePath, function (err, file) {
+
+        if (!isDirectorySnippet) {
+            ErrorHandler.show("Can't edit non-directory snippet");
+            return;
+        }
+
+        return SnippetDialog.show(snippet, function (newSnippet) {
+            var defer = $.Deferred();
+
+            FileSystem.resolve(snippet.snippetFilePath, function (err, file) {
+
+                // error resolving the snippet file
+                if (err) {
+                    ErrorHandler.show(err);
+                    defer.reject();
+                    return;
+                }
+
+                file.write(newSnippet.template, function (err) {
+
+                    // error writing to the snippet file
                     if (err) {
                         ErrorHandler.show(err);
+                        defer.reject();
                         return;
                     }
-                    file.write(newSnippet.template, function (err) {
-                        if (err) {
-                            ErrorHandler.show(err);
-                            return;
-                        }
-                        updateSnippet(newSnippet);
-                    });
+
+                    // success
+                    updateSnippet(newSnippet);
+                    defer.resolve();
+
                 });
-            } else {
-                newSnippet.source = "user";
-                updateSnippet(newSnippet);
-            }
+
+            });
+
+            return defer.promise();
         });
     }
 

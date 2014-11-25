@@ -4,6 +4,7 @@
 * Ensures default snippet directory is correctly set on the startup.
 * All new snippets are written into current default snippet directory.
 * New snippet dialog doesn't close when you can't write new snippet file.
+* Disabled ability to edit non-file snippets which will soon disappear completely.
 
 ## 0.0.6 (25/11/2014)
 * You can now use same variable multiple times in snippet.
