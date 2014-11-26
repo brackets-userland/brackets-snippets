@@ -1,5 +1,5 @@
 {{ #snippets }}
-    <div class="snippet-entry" x-snippet-id="{{ _id }}">{{ name }}</div>
+    <div class="snippet-entry" x-snippet-path="{{ fullPath }}">{{ name }}</div>
 {{ /snippets }}
 {{ ^snippets }}
     {{ Strings.NO_SNIPPETS_FOUND }}

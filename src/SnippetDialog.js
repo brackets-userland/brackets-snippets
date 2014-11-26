@@ -91,6 +91,7 @@ define(function (require, exports) {
         });
     }
 
+    // SnippetDialog will always make a copy of snippet, it does not edit it directly
     function show(_snippet, _onSuccessBeforeClose) {
         defer                 = Promise.defer();
         onSuccessBeforeClose  = _onSuccessBeforeClose;

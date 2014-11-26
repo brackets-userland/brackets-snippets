@@ -54,6 +54,12 @@ define(function (require, exports) {
         this.$deleteSnippetBtn = this.$htmlContent.find(".delete-snippet");
     };
 
+    SnippetWidget.prototype.getSnippetByPath = function (fullPath) {
+        return _.find(this.snippets, function (snippet) {
+            return snippet.fullPath === fullPath;
+        });
+    };
+
     // override onAdded to call setInlineWidgetHeight
     SnippetWidget.prototype.onAdded = function () {
         this.parentClass.onAdded.call(this);
@@ -92,10 +98,10 @@ define(function (require, exports) {
         // add events to snippet list
         this.$snippetsList
             .on("click", ".snippet-entry", function () {
-                var snippetId = parseInt($(this).attr("x-snippet-id"), 10),
-                    s = _.find(self.snippets, function (s) { return s._id === snippetId; });
-                if (s) {
-                    self.selectSnippet(s);
+                var snippetPath = $(this).attr("x-snippet-path"),
+                    snippet     = self.getSnippetByPath(snippetPath);
+                if (snippet) {
+                    self.selectSnippet(snippet);
                 }
             })
             .on("dblclick", ".snippet-entry", function () {
@@ -198,7 +204,7 @@ define(function (require, exports) {
             this.selectedSnippet = snippet;
         } else if (this.selectedSnippet) {
             // if a snippet was previously selected try to find this snippet between current snippets
-            var s = _.find(this.snippets, function (s) { return s._id === this.selectedSnippet._id; }, this);
+            var s = this.getSnippetByPath(this.selectedSnippet.fullPath);
             // if not found, just select first one available
             if (!s) { this.selectedSnippet = this.snippets.length > 0 ? this.snippets[0] : null; }
         } else {
@@ -212,7 +218,10 @@ define(function (require, exports) {
 
         this.$snippetsList.find(".selected").removeClass("selected");
         if (this.selectedSnippet) {
-            var $selected = this.$snippetsList.find("[x-snippet-id='" + this.selectedSnippet._id + "']").addClass("selected");
+            // TODO: there's no snippet _id anymore
+            var $selected = this.$snippetsList
+                .find("[x-snippet-path='" + this.selectedSnippet.fullPath + "']")
+                .addClass("selected");
             // this will scroll $snippetsList so $selected is in view
             this.$snippetsList.scrollTop(this.$snippetsList.scrollTop() +
                                          $selected.position().top -
@@ -225,7 +234,7 @@ define(function (require, exports) {
     SnippetWidget.prototype.selectPrevSnippet = function () {
         var prevSnippet = null;
         for (var i = 0; i < this.snippets.length; i++) {
-            if (this.snippets[i]._id === this.selectedSnippet._id) {
+            if (this.snippets[i].fullPath === this.selectedSnippet.fullPath) {
                 prevSnippet = this.snippets[i - 1];
                 break;
             }
@@ -238,7 +247,7 @@ define(function (require, exports) {
     SnippetWidget.prototype.selectNextSnippet = function () {
         var nextSnippet = null;
         for (var i = 0; i < this.snippets.length; i++) {
-            if (this.snippets[i]._id === this.selectedSnippet._id) {
+            if (this.snippets[i].fullPath === this.selectedSnippet.fullPath) {
                 nextSnippet = this.snippets[i + 1];
                 break;
             }
@@ -264,7 +273,7 @@ define(function (require, exports) {
         }
 
         $snippetName.text(this.selectedSnippet.name);
-        $snippetPath.text(this.selectedSnippet.snippetFilePath || "-");
+        $snippetPath.text(this.selectedSnippet.fullPath || "-");
 
         var escaped = _.escape(this.selectedSnippet.template),
             variables = escaped.match(/\{\{\$[^\}]+\}\}/g);

@@ -5,8 +5,14 @@ define(function (require, exports, module) {
         ExtensionUtils  = brackets.getModule("utils/ExtensionUtils");
 
     // Local modules
-    var SnippetWidget = require("src/SnippetWidget"),
+    var Promise       = require("bluebird"),
+        SnippetWidget = require("src/SnippetWidget"),
         Snippets      = require("src/Snippets");
+
+    // Bluebird config
+    Promise.onPossiblyUnhandledRejection(function (e/*, promise*/) {
+        if (e != null) { throw e; }
+    });
 
     // Extension initialisation
     AppInit.appReady(function () {
