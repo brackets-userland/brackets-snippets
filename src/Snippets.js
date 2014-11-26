@@ -30,6 +30,11 @@ define(function (require, exports, module) {
         });
     };
     SnippetCollection.push = function () {
+        for (var i = 0, l = arguments.length; i < l; i++) {
+            if (!(arguments[i] instanceof Snippet)) {
+                throw new Error("Pushing non-snippet into SnippetCollection!");
+            }
+        }
         var r = Array.prototype.push.apply(this, arguments);
         this.sort();
         return r;
@@ -47,6 +52,10 @@ define(function (require, exports, module) {
         return _.filter(SnippetCollection, function (snippet) {
             return regExp.test(snippet.name);
         });
+    }
+
+    function addToCollection(snippet) {
+        SnippetCollection.push(snippet);
     }
 
     // this should delete only the snippets in the default snippet directory
@@ -302,6 +311,7 @@ define(function (require, exports, module) {
             });
     }
 
+    exports.addToCollection             = addToCollection;
     exports.clearAll                    = deleteAll;
     exports.getAll                      = getAll;
     exports.search                      = search;

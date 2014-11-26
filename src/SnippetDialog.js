@@ -49,9 +49,10 @@ define(function (require, exports) {
             Utils.askQuestion(Strings.LOAD_SNIPPET_FROM_GIST, String.ENTER_GIST_URL, "string")
                 .then(function (url) {
 
-                    Gist.downloadFirst(url).then(function (snippet) {
-                        $snippetName.val(snippet.name).trigger("change").focus();
-                        $snippetEditor.val(snippet.template).trigger("change");
+                    Gist.downloadInfo(url).then(function (objs) {
+                        var obj = objs[0];
+                        $snippetName.val(obj.name).trigger("change").focus();
+                        $snippetEditor.val(obj.template).trigger("change");
                     });
 
                 });

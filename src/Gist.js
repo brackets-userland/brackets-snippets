@@ -11,6 +11,7 @@ define(function (require, exports) {
     var ErrorHandler  = require("src/ErrorHandler"),
         Preferences   = require("src/Preferences"),
         Promise       = require("bluebird"),
+        Snippet       = require("src/Snippet"),
         Snippets      = require("src/Snippets"),
         Strings       = require("strings");
 
@@ -172,7 +173,7 @@ define(function (require, exports) {
         return m ? m[1] : null;
     }
 
-    function downloadFirst(url) {
+    function downloadInfo(url) {
         var defer = Promise.defer();
 
         if (!_authorize()) {
@@ -181,8 +182,8 @@ define(function (require, exports) {
 
         var gistId = _parseGistId(url);
         if (gistId) {
-            return _downloadGist(GITHUB_API_SERVER + "/gists/" + gistId).then(function (snippets) {
-                return snippets[0];
+            _downloadGist(GITHUB_API_SERVER + "/gists/" + gistId).then(function (objs) {
+                defer.resolve(objs);
             });
         } else {
             ErrorHandler.show("No id found in URL: " + url);
@@ -201,28 +202,35 @@ define(function (require, exports) {
 
         var finish = function (url) {
             _downloadGist(url)
-                .then(function (newSnippets) {
+                .then(function (objs) {
+
+                    var newSnippets = [];
 
                     // dispose of old snippets
                     if (options.deleteLocal) {
                         Snippets.clearAll();
                     }
 
-                    // insert new snippets
-                    newSnippets.forEach(function (snippet) {
-                        snippet.source = "gist";
-                        Snippets.loadSnippet(snippet);
+                    // create new snippets
+                    var promises = objs.map(function (obj) {
+                        return Snippet.create(obj.name, obj.template).then(function (snippet) {
+                            Snippets.addToCollection(snippet);
+                            newSnippets.push(snippet);
+                        });
                     });
 
-                    // show dialog about success
-                    Dialogs.showModalDialog(
-                        DefaultDialogs.DIALOG_ID_INFO,
-                        Strings.IMPORT_FROM_GIST,
-                        Strings.IMPORT_SUCCESSFUL
-                    );
+                    Promise.all(promises).then(function () {
 
-                    defer.resolve();
+                        // show dialog about success
+                        Dialogs.showModalDialog(
+                            DefaultDialogs.DIALOG_ID_INFO,
+                            Strings.IMPORT_FROM_GIST,
+                            Strings.IMPORT_SUCCESSFUL
+                        );
 
+                        defer.resolve(newSnippets);
+
+                    });
                 })
                 .catch(function () {
                     defer.reject();
@@ -275,7 +283,7 @@ define(function (require, exports) {
             });
     }
 
-    exports.downloadFirst = downloadFirst;
+    exports.downloadInfo  = downloadInfo;
     exports.downloadAll   = downloadAll;
     exports.uploadAll     = uploadAll;
 
