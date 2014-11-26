@@ -10,6 +10,7 @@ define(function (require, exports) {
     var ErrorHandler  = require("src/ErrorHandler"),
         Gist          = require("src/Gist"),
         Preferences   = require("src/Preferences"),
+        Promise       = require("bluebird"),
         Snippets      = require("src/Snippets"),
         Strings       = require("strings"),
         Utils         = require("src/Utils");
@@ -106,10 +107,10 @@ define(function (require, exports) {
 
         $dialog.find(".btn-gist-import").on("click", function () {
             Utils.askQuestion(Strings.IMPORT_FROM_GIST, Strings.IMPORT_FROM_GIST_QUESTION, "string")
-                .done(function (url) {
+                .then(function (url) {
 
                     Utils.askQuestion(Strings. IMPORT_FROM_GIST, Strings.IMPORT_FROM_GIST_DELETE_LOCAL, "boolean")
-                        .done(function (deleteLocal) {
+                        .then(function (deleteLocal) {
 
                             Gist.downloadAll(url, {
                                 deleteLocal: deleteLocal
@@ -143,7 +144,7 @@ define(function (require, exports) {
                 snippetDirectories  = Preferences.get("snippetDirectories");
 
             Utils.askQuestion(Strings.SNIPPET_DIRECTORY_DELETE, Strings.SNIPPET_DIRECTORY_DELETE_CONFIRM, "boolean")
-                .done(function (answer) {
+                .then(function (answer) {
                     if (answer === true) {
                         var sd = _.find(snippetDirectories, function (d) {
                             return d.fullPath === fullPath;
@@ -158,7 +159,7 @@ define(function (require, exports) {
 
         $dialog.on("click", ".btn-add-snippet-directory", function () {
             Utils.askQuestion(Strings.SNIPPET_DIRECTORY_ADD, Strings.SPECIFY_DIRECTORY_FULLPATH, "string")
-                .done(function (fullPath) {
+                .then(function (fullPath) {
                     var snippetDirectories = Preferences.get("snippetDirectories");
                     snippetDirectories.push({
                         fullPath: fullPath,
@@ -181,7 +182,7 @@ define(function (require, exports) {
         $dialog.on("click", ".reset-default-directory-btn", function () {
             var path = Snippets.getDefaultSnippetDirectory();
             Utils.askQuestion(Strings.RESET_DEFAULT_DIR, Strings.RESET_DEFAULT_DIR_MSG + " " + path, "boolean")
-                .done(function (answer) {
+                .then(function (answer) {
                     if (answer === true) {
                         $dialog.find("[x-preference='defaultSnippetDirectory']").val(path).trigger("change");
                     }
@@ -190,7 +191,7 @@ define(function (require, exports) {
     }
 
     function show() {
-        defer = $.Deferred();
+        defer = Promise.defer();
 
         var sd = Preferences.get("snippetDirectories").map(function (d) {
             var lookedFor = "zaggino.brackets-snippets/default_snippets",
@@ -224,7 +225,7 @@ define(function (require, exports) {
         _fillValues();
         _attachEvents();
 
-        return defer.promise();
+        return defer.promise;
     }
 
     exports.show = show;

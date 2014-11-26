@@ -10,6 +10,7 @@ define(function (require, exports) {
     // Local modules
     var ErrorHandler  = require("src/ErrorHandler"),
         Preferences   = require("src/Preferences"),
+        Promise       = require("bluebird"),
         Snippets      = require("src/Snippets"),
         Strings       = require("strings");
 
@@ -30,7 +31,7 @@ define(function (require, exports) {
     }
 
     function _findGist() {
-        var defer = $.Deferred();
+        var defer = Promise.defer();
 
         $.ajax({
             url: GITHUB_API_SERVER + "/gists",
@@ -54,11 +55,11 @@ define(function (require, exports) {
             defer.reject(err);
         });
 
-        return defer.promise();
+        return defer.promise;
     }
 
     function _updateGist(existingGist) {
-        var defer = $.Deferred();
+        var defer = Promise.defer();
 
         var payload = {
             "description": DEFAULT_GIST_DESCRIPTION,
@@ -110,7 +111,7 @@ define(function (require, exports) {
             defer.reject(err);
         });
 
-        return defer.promise();
+        return defer.promise;
     }
 
     function _parseSnippetsFromGist(gist) {
@@ -123,7 +124,7 @@ define(function (require, exports) {
     }
 
     function _downloadGist(url) {
-        var defer = $.Deferred();
+        var defer = Promise.defer();
 
         $.ajax({
             url: url,
@@ -143,7 +144,7 @@ define(function (require, exports) {
                     });
 
                 data.forEach(function (d) {
-                    _downloadGist(d.url).done(function (s) {
+                    _downloadGist(d.url).then(function (s) {
                         snippets = snippets.concat(s);
                         finish();
                     });
@@ -158,7 +159,7 @@ define(function (require, exports) {
             defer.reject(err);
         });
 
-        return defer.promise();
+        return defer.promise;
     }
 
     function _parseGistId(url) {
@@ -172,7 +173,7 @@ define(function (require, exports) {
     }
 
     function downloadFirst(url) {
-        var defer = $.Deferred();
+        var defer = Promise.defer();
 
         if (!_authorize()) {
             defer.reject();
@@ -180,7 +181,7 @@ define(function (require, exports) {
 
         var gistId = _parseGistId(url);
         if (gistId) {
-            return _downloadGist(GITHUB_API_SERVER + "/gists/" + gistId).done(function (snippets) {
+            return _downloadGist(GITHUB_API_SERVER + "/gists/" + gistId).then(function (snippets) {
                 return snippets[0];
             });
         } else {
@@ -188,11 +189,11 @@ define(function (require, exports) {
             defer.reject();
         }
 
-        return defer.promise();
+        return defer.promise;
     }
 
     function downloadAll(url, options) {
-        var defer = $.Deferred();
+        var defer = Promise.defer();
 
         if (!_authorize()) {
             defer.reject();
@@ -200,7 +201,7 @@ define(function (require, exports) {
 
         var finish = function (url) {
             _downloadGist(url)
-                .done(function (newSnippets) {
+                .then(function (newSnippets) {
 
                     // dispose of old snippets
                     if (options.deleteLocal) {
@@ -223,7 +224,7 @@ define(function (require, exports) {
                     defer.resolve();
 
                 })
-                .fail(function () {
+                .catch(function () {
                     defer.reject();
                 });
         };
@@ -247,7 +248,7 @@ define(function (require, exports) {
             }
 
         } else {
-            _findGist().done(function (found) {
+            _findGist().then(function (found) {
 
                 if (found) {
                     finish(found.url);
@@ -256,34 +257,22 @@ define(function (require, exports) {
                     defer.reject();
                 }
 
-            }).fail(function () {
+            }).catch(function () {
                 defer.reject();
             });
         }
 
-        return defer.promise();
+        return defer.promise;
     }
 
     function uploadAll() {
-        var defer = $.Deferred();
-
         if (!_authorize()) {
-            defer.reject();
+            return Promise.reject();
         }
-
-        _findGist().done(function (found) {
-
-            _updateGist(found).done(function () {
-                defer.resolve();
-            }).fail(function () {
-                defer.reject();
+        return _findGist()
+            .then(function (found) {
+                return _updateGist(found);
             });
-
-        }).fail(function () {
-            defer.reject();
-        });
-
-        return defer.promise();
     }
 
     exports.downloadFirst = downloadFirst;

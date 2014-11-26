@@ -1,0 +1,10 @@
+{
+    "paths": {
+        "bluebird": "./thirdparty/bluebird"
+    },
+    "config": {
+        "moment": {
+            "noGlobal": true
+        }
+    }
+}

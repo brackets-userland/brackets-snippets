@@ -111,26 +111,41 @@ define(function (require, exports) {
         // add event for new snippet
         this.$htmlContent.find(".new-snippet").on("click", function () {
             var newSnippet = { name: self.$searchInput.val().trim() };
-            Snippets.addNewSnippetDialog(newSnippet).done(refresh);
+            Snippets.addNewSnippetDialog(newSnippet)
+                .then(function () {
+                    refresh();
+                });
         });
 
         // event for snippet editing
         this.$editSnippetBtn.on("click", function () {
-            Snippets.editSnippetDialog(self.selectedSnippet).done(refresh);
+            Snippets.editSnippetDialog(self.selectedSnippet)
+                .then(function () {
+                    refresh();
+                });
         });
 
         // event for snippet deleting
         this.$deleteSnippetBtn.on("click", function (e) {
             if (e.shiftKey) {
-                Snippets.deleteAllSnippetsDialog().done(refresh);
+                Snippets.deleteAllSnippetsDialog()
+                    .then(function () {
+                        refresh();
+                    });
                 return;
             }
-            Snippets.deleteSnippetDialog(self.selectedSnippet).done(refresh);
+            Snippets.deleteSnippetDialog(self.selectedSnippet)
+                .then(function () {
+                    refresh();
+                });
         });
 
         // event for settings dialog
         this.$htmlContent.find(".snippets-settings").on("click", function () {
-            SettingsDialog.show().done(refresh);
+            SettingsDialog.show()
+                .then(function () {
+                    refresh();
+                });
         });
 
         // event for resizing variable inputs

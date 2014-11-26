@@ -7,6 +7,7 @@ define(function (require, exports) {
 
     // Local modules
     var Gist          = require("src/Gist"),
+        Promise       = require("bluebird"),
         Strings       = require("strings"),
         Utils         = require("src/Utils");
 
@@ -46,9 +47,9 @@ define(function (require, exports) {
 
         $dialog.find(".btn-load-from-gist").on("click", function () {
             Utils.askQuestion(Strings.LOAD_SNIPPET_FROM_GIST, String.ENTER_GIST_URL, "string")
-                .done(function (url) {
+                .then(function (url) {
 
-                    Gist.downloadFirst(url).done(function (snippet) {
+                    Gist.downloadFirst(url).then(function (snippet) {
                         $snippetName.val(snippet.name).trigger("change").focus();
                         $snippetEditor.val(snippet.template).trigger("change");
                     });
@@ -58,7 +59,7 @@ define(function (require, exports) {
 
         $dialog.find("[data-button-id='ok']").on("click", function (e) {
             if (onSuccessBeforeClose) {
-                onSuccessBeforeClose(snippet).done(function () {
+                onSuccessBeforeClose(snippet).then(function () {
                     // this is copied from inside of Brackets on how to close dialog with "ok"
                     $dialog.data("buttonId", "ok");
                     $dialog.modal("hide");
@@ -91,7 +92,7 @@ define(function (require, exports) {
     }
 
     function show(_snippet, _onSuccessBeforeClose) {
-        defer                 = $.Deferred();
+        defer                 = Promise.defer();
         onSuccessBeforeClose  = _onSuccessBeforeClose;
 
         if (typeof _snippet === "object") {
@@ -102,7 +103,7 @@ define(function (require, exports) {
 
         _show();
 
-        return defer.promise();
+        return defer.promise;
     }
 
     exports.show = show;

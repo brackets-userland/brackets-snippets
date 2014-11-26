@@ -9,6 +9,7 @@ define(function (require, exports, module) {
     // Local modules
     var ErrorHandler  = require("src/ErrorHandler"),
         Preferences   = require("src/Preferences"),
+        Promise       = require("bluebird"),
         SnippetDialog = require("src/SnippetDialog"),
         Strings       = require("strings"),
         Utils         = require("src/Utils");
@@ -95,14 +96,38 @@ define(function (require, exports, module) {
         _sortSnippets();
     }
 
-    // TODO: reimplement to work with default snippet directory
     function deleteSnippet(snippet) {
-        var idx = SnippetCollection.length;
-        while (idx--) {
-            if (SnippetCollection[idx]._id === snippet._id) {
-                SnippetCollection.splice(idx, 1);
+        var defer = Promise.defer();
+
+        FileSystem.resolve(snippet.snippetFilePath, function (err, file) {
+
+            if (err) {
+                ErrorHandler.show(err);
+                defer.reject();
+                return;
             }
-        }
+
+            file.unlink(function (err) {
+
+                if (err) {
+                    ErrorHandler.show(err);
+                    defer.reject();
+                    return;
+                }
+
+                var idx = SnippetCollection.length;
+                while (idx--) {
+                    if (SnippetCollection[idx]._id === snippet._id) {
+                        SnippetCollection.splice(idx, 1);
+                    }
+                }
+                defer.resolve();
+
+            });
+
+        });
+
+        return defer.promise;
     }
 
     // TODO: reimplement to work with default snippet directory
@@ -196,7 +221,7 @@ define(function (require, exports, module) {
     }
 
     function checkDefaultSnippetsDirectories() {
-        var defer = $.Deferred();
+        var defer = Promise.defer();
 
         var modulePath = ExtensionUtils.getModulePath(module);
         FileSystem.resolve(modulePath + "../default_snippets/", function (err, entry) {
@@ -227,11 +252,11 @@ define(function (require, exports, module) {
 
         });
 
-        return defer.promise();
+        return defer.promise;
     }
 
     function ensureDefaultSnippetDirectory() {
-        var defer = $.Deferred();
+        var defer = Promise.defer();
 
         var defaultSnippetDirectory = Preferences.get("defaultSnippetDirectory");
         if (!defaultSnippetDirectory) {
@@ -274,12 +299,12 @@ define(function (require, exports, module) {
             defer.resolve(true);
         });
 
-        return defer.promise()
-            .fail(function (reason) {
+        return defer.promise
+            .catch(function (reason) {
                 Preferences.set("defaultSnippetDirectory", getDefaultSnippetDirectory());
                 throw reason;
             })
-            .done(function () {
+            .then(function () {
                 Preferences.set("defaultSnippetDirectory", defaultSnippetDirectory);
             });
     }
@@ -287,10 +312,10 @@ define(function (require, exports, module) {
     // TODO: we need a migration for Preferences.get("SnippetsCollection") into default snippets directory
     function init() {
         ensureDefaultSnippetDirectory()
-            .done(function () {
+            .then(function () {
                 return checkDefaultSnippetsDirectories();
             })
-            .done(function () {
+            .then(function () {
                 return loadSnippetsFromDirectories();
             });
     }
@@ -312,7 +337,7 @@ define(function (require, exports, module) {
     function addNewSnippetDialog(snippet) {
         return SnippetDialog.show(snippet, function (newSnippet) {
             // dialog should only be closed, if this promise is resolved
-            var defer = $.Deferred();
+            var defer = Promise.defer();
 
             var newFileName = Preferences.get("defaultSnippetDirectory") + newSnippet.name;
             FileSystem.resolve(newFileName, function (err) {
@@ -351,13 +376,89 @@ define(function (require, exports, module) {
 
             });
 
-            return defer.promise();
+            return defer.promise;
         });
     }
 
-    // TODO: what about renames?
+    function _renameSnippetFile(oldName, newName, oldFullPath) {
+        var defer = Promise.defer();
+
+        // decide on the new name
+        var split = oldFullPath.split("/");
+        split.pop(); // removes old name
+        split.push(newName); // adds new name
+        var newFullPath = split.join("/");
+
+        FileSystem.resolve(oldFullPath, function (err, file) {
+
+            // error resolving the file
+            if (err) {
+                ErrorHandler.show(err);
+                defer.reject();
+                return;
+            }
+
+            file.rename(newFullPath, function (err) {
+
+                // target file already exists
+                if (err === "AlreadyExists") {
+                    ErrorHandler.show("File already exists: " + newFullPath);
+                    defer.reject();
+                    return;
+                }
+
+                // error renaming the file
+                if (err) {
+                    ErrorHandler.show(err);
+                    defer.reject();
+                    return;
+                }
+
+                defer.resolve(newFullPath);
+
+            });
+
+        });
+
+        return defer.promise;
+    }
+
+    function _overwriteSnippetFile(fullPath, content) {
+        var defer = Promise.defer();
+
+        FileSystem.resolve(fullPath, function (err, file) {
+
+            // error resolving the snippet file
+            if (err) {
+                ErrorHandler.show(err);
+                defer.reject();
+                return;
+            }
+
+            // we need a blind write here because file could have been just renamed
+            // and fs was not able to pick up on the changes yet
+            file.write(content, function (err) {
+
+                // error writing to the snippet file
+                if (err) {
+                    ErrorHandler.show(err);
+                    defer.reject();
+                    return;
+                }
+
+                // success
+                defer.resolve();
+
+            });
+
+        });
+
+        return defer.promise;
+    }
+
     function editSnippetDialog(snippet) {
-        var isDirectorySnippet = snippet.source === "directory";
+        var oldName             = snippet.name,
+            isDirectorySnippet  = snippet.source === "directory";
 
         if (!isDirectorySnippet) {
             ErrorHandler.show("Can't edit non-directory snippet");
@@ -365,52 +466,64 @@ define(function (require, exports, module) {
         }
 
         return SnippetDialog.show(snippet, function (newSnippet) {
-            var defer = $.Deferred();
+            var defer   = Promise.defer(),
+                newName = newSnippet.name;
 
-            FileSystem.resolve(snippet.snippetFilePath, function (err, file) {
-
-                // error resolving the snippet file
-                if (err) {
-                    ErrorHandler.show(err);
-                    defer.reject();
-                    return;
-                }
-
-                file.write(newSnippet.template, function (err) {
-
-                    // error writing to the snippet file
-                    if (err) {
-                        ErrorHandler.show(err);
+            var writeContent = function () {
+                _overwriteSnippetFile(newSnippet.snippetFilePath, newSnippet.template)
+                    .then(function () {
+                        defer.resolve();
+                    }).catch(function () {
                         defer.reject();
-                        return;
-                    }
+                    });
+            };
 
-                    // success
-                    updateSnippet(newSnippet);
-                    defer.resolve();
+            if (oldName !== newName) {
 
-                });
+                // we need to rename the file
+                _renameSnippetFile(oldName, newName, snippet.snippetFilePath)
+                    .then(function (newFullPath) {
+
+                        // save the new path to the snippet object
+                        newSnippet.snippetFilePath = newFullPath;
+
+                        // write template changes to disk
+                        writeContent();
+
+                    }).catch(function () {
+                        defer.reject();
+                    });
+
+            } else {
+
+                // write template changes to disk
+                writeContent();
+
+            }
+
+            return defer.promise.then(function () {
+
+                // update snippet if all went fine
+                return updateSnippet(newSnippet);
 
             });
-
-            return defer.promise();
         });
     }
 
     function deleteSnippetDialog(snippet) {
         return Utils.askQuestion(Strings.QUESTION, Strings.SNIPPET_DELETE_CONFIRM, "boolean")
-            .done(function (response) {
+            .then(function (response) {
                 if (response === true) {
-                    deleteSnippet(snippet);
+                    return deleteSnippet(snippet);
                 }
             });
     }
 
     function deleteAllSnippetsDialog() {
         return Utils.askQuestion(Strings.QUESTION, Strings.SNIPPET_DELETE_ALL_CONFIRM, "boolean")
-            .done(function (response) {
+            .then(function (response) {
                 if (response === true) {
-                    clearAll();
+                    return clearAll();
                 }
             });
     }

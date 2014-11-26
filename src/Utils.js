@@ -6,13 +6,15 @@ define(function (require, exports) {
         Dialogs = brackets.getModule("widgets/Dialogs");
 
     // Local modules
-    var Strings = require("strings");
+    var ErrorHandler  = require("src/ErrorHandler"),
+        Promise       = require("bluebird"),
+        Strings       = require("strings");
 
     // Templates
     var questionDialogTemplate = require("text!templates/QuestionDialog.html");
 
     function askQuestion(title, question, responseType) {
-        var defer = $.Deferred();
+        var defer = Promise.defer();
 
         var compiledTemplate = Mustache.render(questionDialogTemplate, {
             title: title,
@@ -44,10 +46,12 @@ define(function (require, exports) {
                 }
             } else if (responseType === "boolean") {
                 defer.resolve(buttonId === "true");
+            } else {
+                ErrorHandler.show("Unknown responseType for question: " + responseType);
             }
         });
 
-        return defer.promise();
+        return defer.promise;
     }
 
     exports.askQuestion = askQuestion;
