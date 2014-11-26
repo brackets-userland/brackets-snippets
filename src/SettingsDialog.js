@@ -11,7 +11,6 @@ define(function (require, exports) {
         Gist          = require("src/Gist"),
         Preferences   = require("src/Preferences"),
         Promise       = require("bluebird"),
-        Snippets      = require("src/Snippets"),
         Strings       = require("strings"),
         Utils         = require("src/Utils");
 
@@ -180,7 +179,7 @@ define(function (require, exports) {
         });
 
         $dialog.on("click", ".reset-default-directory-btn", function () {
-            var path = Snippets.getDefaultSnippetDirectory();
+            var path = Preferences.getDefaults().defaultSnippetDirectory;
             Utils.askQuestion(Strings.RESET_DEFAULT_DIR, Strings.RESET_DEFAULT_DIR_MSG + " " + path, "boolean")
                 .then(function (answer) {
                     if (answer === true) {

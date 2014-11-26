@@ -29,10 +29,6 @@ define(function (require, exports, module) {
         });
     }
 
-    function getDefaultSnippetDirectory() {
-        return brackets.app.getApplicationSupportDirectory() + "/snippets/";
-    }
-
     // TODO: re-analyze now that user and gist snippets are no more
     function loadSnippet(snippet) {
         // snippet.source === "directory"
@@ -260,7 +256,7 @@ define(function (require, exports, module) {
 
         var defaultSnippetDirectory = Preferences.get("defaultSnippetDirectory");
         if (!defaultSnippetDirectory) {
-            defaultSnippetDirectory = getDefaultSnippetDirectory();
+            defaultSnippetDirectory = Preferences.getDefaults().defaultSnippetDirectory;
         }
 
         // fix windows paths
@@ -301,7 +297,7 @@ define(function (require, exports, module) {
 
         return defer.promise
             .catch(function (reason) {
-                Preferences.set("defaultSnippetDirectory", getDefaultSnippetDirectory());
+                Preferences.set("defaultSnippetDirectory", Preferences.getDefaults().defaultSnippetDirectory);
                 throw reason;
             })
             .then(function () {
@@ -537,6 +533,5 @@ define(function (require, exports, module) {
     exports.editSnippetDialog           = editSnippetDialog;
     exports.deleteSnippetDialog         = deleteSnippetDialog;
     exports.deleteAllSnippetsDialog     = deleteAllSnippetsDialog;
-    exports.getDefaultSnippetDirectory  = getDefaultSnippetDirectory;
 
 });
