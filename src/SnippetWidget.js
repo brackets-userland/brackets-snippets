@@ -74,7 +74,7 @@ define(function (require, exports) {
                 if (reverse) {
                     pos -= 1;
                     if (pos < 0) {
-                       pos = variables.length - 1;
+                        pos = variables.length - 1;
                     }
                 } else {
                     pos += 1;
