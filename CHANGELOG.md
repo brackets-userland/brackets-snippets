@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.1 (28/11/2014)
+* Fixed some issues when using tab key to navigate snippet variables.
+
 ## 0.1.0 (26/11/2014)
 * Rewritten in the way that all snippets are stored in files.
 * Ensures default snippet directory is correctly set on the startup.

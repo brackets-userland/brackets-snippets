@@ -18,6 +18,13 @@ Available to install from Brackets inbuilt [extension registry](https://brackets
 - Set cursor position after inserting a snippet with cursor mark ({{!cursor}}) (v0.0.2)
 - Support for variables in snippets (v0.0.4)
 
+###Keyboard
+- Use `Alt-S` (or your own defined shortcut) to open a snippet widget
+- Use `Up` and `Down` arrows to navigate between various snippets
+- Use `Enter` key to insert currently selected snippet (if there are any variables, `Enter` will navigate you to the variables you need to fill out first)
+- Use `Tab` key to navigate between variables (if there are any empty ones, `Tab` only navigates between empty)
+- Use `Esc` key to close the widget any time
+
 ###Creating own snippet
 
 ![create-snippet-image](docs/images/create-new-snippet.png)

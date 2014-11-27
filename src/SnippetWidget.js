@@ -60,6 +60,60 @@ define(function (require, exports) {
         });
     };
 
+    SnippetWidget.prototype.executeTab = function ($from, reverse) {
+
+        if ($from.is(".variable")) {
+
+            // going from a variable we go to next/prev variable
+            var $variables = this.$currentSnippetArea.find(".variable"),
+                variables = $variables.toArray(),
+                areEmpty = $variables.map(function () { return $(this).val(); }).toArray().indexOf("") !== -1,
+                currentPos = variables.indexOf($from[0]);
+
+            var step = function (pos) {
+                if (reverse) {
+                    pos -= 1;
+                    if (pos < 0) {
+                       pos = variables.length - 1;
+                    }
+                } else {
+                    pos += 1;
+                    if (pos >= variables.length) {
+                        pos = 0;
+                    }
+                }
+                return pos;
+            };
+
+            // if all are filled, navigate normally
+            // if some are empty, navigate only empty ones
+            if (!areEmpty) {
+                currentPos = step(currentPos);
+            } else {
+                do {
+                    currentPos = step(currentPos);
+                } while ($(variables[currentPos]).val() !== "");
+            }
+
+            $(variables[currentPos]).focus();
+
+        } else if ($from.is(".snippet-search-input")) {
+
+            // going from search input focus first variable if there's one
+            var $vars = this.$currentSnippetArea.find(".variable");
+            if ($vars.length > 0 && !reverse) {
+                $vars.first().focus();
+            }
+
+        } else {
+
+            // focus search input
+            this.$htmlContent.find(".snippet-search-input").focus();
+
+        }
+
+    };
+
     // override onAdded to call setInlineWidgetHeight
     SnippetWidget.prototype.onAdded = function () {
         this.parentClass.onAdded.call(this);
@@ -87,6 +141,11 @@ define(function (require, exports) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 self.insertSnippet();
+            }
+            if (e.which === 9) { // tab key
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                self.executeTab($(e.target), e.shiftKey);
             }
         });
 
@@ -168,7 +227,7 @@ define(function (require, exports) {
             .on("blur", ".variable", function () {
                 var $this = $(this),
                     val = $this.val();
-                resizeInput($this, val.length);
+                resizeInput($this, val ? val.length : $this.attr("placeholder").length);
             })
             .on("keyup", ".variable", function () {
                 var that = this,
