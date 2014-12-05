@@ -2,6 +2,7 @@
 
 ## 0.2.0 (05/12/2014)
 * Text on current line can be used to prefill snippets widget (type `ng` and use alt-S)
+* If the prefill text is an exact match, this snippet will be inserted automatically (type `bs-table` and use alt-S)
 
 ## 0.1.1 (28/11/2014)
 * Fixed some issues when using tab key to navigate snippet variables.

@@ -353,6 +353,11 @@ define(function (require, exports) {
         }
 
         $pre.html(escaped);
+
+        if (this._onNextRender) {
+            this._onNextRender();
+            delete this._onNextRender;
+        }
     };
 
     SnippetWidget.prototype.hasUnfilledVariables = function () {
@@ -396,6 +401,10 @@ define(function (require, exports) {
         this.prefilledSearch = true;
     };
 
+    SnippetWidget.prototype.onNextRender = function (fn) {
+        this._onNextRender = fn.bind(this);
+    };
+
     SnippetWidget.prototype.insertSnippet = function () {
         if (this.hasUnfilledVariables()) {
             return;
@@ -422,9 +431,14 @@ define(function (require, exports) {
 
         // if line is not empty
         if (currentLine.match(/\S/)) {
-            lineBreakBefore = true;
+
+            if (!this.prefilledSearch) {
+                lineBreakBefore = true;
+            }
+
             var ws = currentLine.match(/^\s+/);
             indent = ws ? ws[0] : "";
+
         } else {
             var i = this.originalCursorPosition.ch;
             while (i--) { indent += " "; }
@@ -451,7 +465,7 @@ define(function (require, exports) {
         }).join("\n");
 
         // insert the text itself
-        if (lineBreakBefore && !this.prefilledSearch) {
+        if (lineBreakBefore) {
             textToInsert = "\n" + textToInsert;
             lines.length += 1;
             doc.replaceRange(textToInsert, positionEnd);
@@ -503,6 +517,17 @@ define(function (require, exports) {
                 results = Snippets.search(searchWith);
             if (results.length > 0) {
                 sWidget.prefillSearch(searchWith);
+
+                // see if we have an exact match
+                var exactMatch = _.find(results, function (snippet) {
+                    return snippet.name === searchWith;
+                });
+                if (exactMatch) {
+                    sWidget.onNextRender(function () {
+                        this.insertSnippet();
+                    });
+                }
+
             }
         }
 
