@@ -391,6 +391,11 @@ define(function (require, exports) {
         return text;
     };
 
+    SnippetWidget.prototype.prefillSearch = function (str) {
+        this.$searchInput.val(str);
+        this.prefilledSearch = true;
+    };
+
     SnippetWidget.prototype.insertSnippet = function () {
         if (this.hasUnfilledVariables()) {
             return;
@@ -446,7 +451,7 @@ define(function (require, exports) {
         }).join("\n");
 
         // insert the text itself
-        if (lineBreakBefore) {
+        if (lineBreakBefore && !this.prefilledSearch) {
             textToInsert = "\n" + textToInsert;
             lines.length += 1;
             doc.replaceRange(textToInsert, positionEnd);
@@ -485,8 +490,22 @@ define(function (require, exports) {
     };
 
     function triggerWidget() {
-        var activeEditor = EditorManager.getActiveEditor(),
-            sWidget      = new SnippetWidget(activeEditor, activeEditor.getCursorPos());
+        var activeEditor  = EditorManager.getActiveEditor(),
+            sWidget       = new SnippetWidget(activeEditor, activeEditor.getCursorPos());
+
+        // check what's on current line
+        var currentLineNo = activeEditor.getCursorPos().line,
+            currentLine   = activeEditor.document.getRange({ line: currentLineNo, ch: 0 }, { line: currentLineNo, ch: 999 });
+        if (currentLine.match(/\S/)) {
+            // if current line is not empty, try to search for a snippet
+            var params = currentLine.trim().replace(/\s+/, " ").split(" "),
+                searchWith = params[0],
+                results = Snippets.search(searchWith);
+            if (results.length > 0) {
+                sWidget.prefillSearch(searchWith);
+            }
+        }
+
         activeEditor.addInlineWidget(activeEditor.getCursorPos(), sWidget, true);
     }
 
