@@ -34,7 +34,5 @@
     "requireCapitalizedConstructors":               true,
     "safeContextKeyword":                           ["self", "that"],
     "disallowYodaConditions":                       true,
-    "requireSpaceAfterLineComment":                 true,
-
-    "additionalRules":                              ["tools/jscs-rules/*.js"]
+    "requireSpaceAfterLineComment":                 true
 }
