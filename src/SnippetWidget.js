@@ -150,9 +150,11 @@ define(function (require, exports) {
         });
 
         // refresh widget on every key and add focus to search input
-        this.$searchInput.on("focus change keyup", function () {
-            self.refreshSnippets();
-        }).focus();
+        this.$searchInput
+            .focus()
+            .on("focus change keyup", function () {
+                self.refreshSnippets();
+            });
 
         // add events to snippet list
         this.$snippetsList
@@ -241,6 +243,9 @@ define(function (require, exports) {
                     }
                 });
             });
+
+        // refresh snippets for the first time
+        self.refreshSnippets();
     };
 
     SnippetWidget.prototype.refreshSnippets = function (force) {
@@ -505,7 +510,8 @@ define(function (require, exports) {
 
     function triggerWidget() {
         var activeEditor  = EditorManager.getActiveEditor(),
-            sWidget       = new SnippetWidget(activeEditor, activeEditor.getCursorPos());
+            sWidget       = new SnippetWidget(activeEditor, activeEditor.getCursorPos()),
+            exactMatch    = false;
 
         // check what's on current line
         var currentLineNo = activeEditor.getCursorPos().line,
@@ -519,7 +525,7 @@ define(function (require, exports) {
                 sWidget.prefillSearch(searchWith);
 
                 // see if we have an exact match
-                var exactMatch = _.find(results, function (snippet) {
+                exactMatch = _.find(results, function (snippet) {
                     return snippet.name === searchWith;
                 });
                 if (exactMatch) {
@@ -531,7 +537,11 @@ define(function (require, exports) {
             }
         }
 
-        activeEditor.addInlineWidget(activeEditor.getCursorPos(), sWidget, true);
+        if (exactMatch) {
+            sWidget.onAdded();
+        } else {
+            activeEditor.addInlineWidget(activeEditor.getCursorPos(), sWidget, true);
+        }
     }
 
     function bindShortcut() {
