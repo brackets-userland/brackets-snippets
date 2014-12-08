@@ -480,7 +480,9 @@ define(function (require, exports) {
         }
 
         // close the widget
-        this.close();
+        if (!this.detachedMode) {
+            this.close();
+        }
 
         // check if there's a three-dot mark in the snippet and put a cursor there if there's one
         if (snippetCursorLine !== null) {
@@ -538,6 +540,7 @@ define(function (require, exports) {
         }
 
         if (exactMatch) {
+            sWidget.detachedMode = true;
             sWidget.onAdded();
         } else {
             activeEditor.addInlineWidget(activeEditor.getCursorPos(), sWidget, true);
