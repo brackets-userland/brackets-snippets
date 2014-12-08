@@ -27,6 +27,14 @@ define(function (require, exports) {
     var snippetWidgetTemplate     = require("text!templates/SnippetWidget.html"),
         snippetWidgetListTemplate = require("text!templates/SnippetWidgetList.html");
 
+    // Helpers
+    function scrollParentToChild($parent, $child) {
+        $parent.scrollTop($parent.scrollTop() +
+                          $child.position().top -
+                          $parent.height() / 2 +
+                          $child.height() / 2);
+    }
+
     /**
      * @constructor
      * @extends {InlineWidget}
@@ -224,6 +232,10 @@ define(function (require, exports) {
             $input.removeClass("required");
         };
         this.$currentSnippetArea
+            .on("focus", ".variable", function () {
+                var $this = $(this);
+                scrollParentToChild($this.parents("pre").first(), $this);
+            })
             .on("keypress", ".variable", function () {
                 var $this = $(this),
                     val = $this.val();
@@ -290,10 +302,7 @@ define(function (require, exports) {
                 .find("[x-snippet-path='" + this.selectedSnippet.fullPath + "']")
                 .addClass("selected");
             // this will scroll $snippetsList so $selected is in view
-            this.$snippetsList.scrollTop(this.$snippetsList.scrollTop() +
-                                         $selected.position().top -
-                                         this.$snippetsList.height() / 2 +
-                                         $selected.height() / 2);
+            scrollParentToChild(this.$snippetsList, $selected);
         }
         this.renderSnippet();
     };
