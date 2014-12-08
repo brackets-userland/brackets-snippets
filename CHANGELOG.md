@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 (08/12/2014)
+* It is possible to prefill variables to widget, try typing `ng-directive myModule` and use alt-S
+* When all variables are prefilled, snippet is inserted automatically, try `ng-controller myModule myController` and use alt-S
+
 ## 0.2.0 (05/12/2014)
 * Text on current line can be used to prefill snippets widget (type `ng` and use alt-S)
 * If the prefill text is an exact match, this snippet will be inserted automatically (type `bs-table` and use alt-S)

@@ -321,6 +321,18 @@ define(function (require, exports) {
         }
     };
 
+    SnippetWidget.prototype.getVariablesFromTemplate = function (template) {
+        var m = template.match(/\{\{\$[^\}]+\}\}/g);
+        return m ? m.map(function (str) {
+            var v = str.match(/\{\{\$([0-9]+)\:([a-zA-Z0-9]+)/);
+            return {
+                num: v[1],
+                name: v[2],
+                str: str
+            };
+        }) : [];
+    };
+
     SnippetWidget.prototype.renderSnippet = function () {
         var $snippetName  = this.$currentSnippetArea.find(".snippet-name"),
             $snippetPath  = this.$currentSnippetArea.find(".snippet-path"),
@@ -340,20 +352,17 @@ define(function (require, exports) {
         $snippetPath.text(this.selectedSnippet.fullPath || "-");
 
         var escaped = _.escape(this.selectedSnippet.template),
-            variables = escaped.match(/\{\{\$[^\}]+\}\}/g);
+            variables = this.getVariablesFromTemplate(escaped);
 
-        if (variables) {
+        if (variables.length > 0) {
             variables.forEach(function (variable) {
-                var m = variable.match(/\{\{\$([0-9]+)\:([a-zA-Z0-9]+)/),
-                    num = m[1],
-                    name = m[2],
-                    magicConstant = 2, // don't ask
-                    w = magicConstant + (name.length * CODEFONT_WIDTH_IN_PX) + "px";
+                var magicConstant = 2, // don't ask
+                    w = magicConstant + (variable.name.length * CODEFONT_WIDTH_IN_PX) + "px";
                 var inputHtml = "<input class='variable' type='text'" +
-                                " x-var-num='" + num + "'" +
-                                " placeholder='" + name + "'" +
+                                " x-var-num='" + variable.num + "'" +
+                                " placeholder='" + variable.name + "'" +
                                 " style='width:" + w + "' />";
-                escaped = escaped.replace(variable, inputHtml);
+                escaped = escaped.replace(variable.str, inputHtml);
             });
         }
 
@@ -363,6 +372,14 @@ define(function (require, exports) {
             this._onNextRender();
             delete this._onNextRender;
         }
+    };
+
+    SnippetWidget.prototype.fillOutVariables = function (params) {
+        this.$currentSnippetArea.find(":input").each(function () {
+            var $this = $(this),
+                num   = parseInt($this.attr("x-var-num"), 10);
+            $this.val(params[num - 1]);
+        });
     };
 
     SnippetWidget.prototype.hasUnfilledVariables = function () {
@@ -511,9 +528,10 @@ define(function (require, exports) {
     };
 
     function triggerWidget() {
-        var activeEditor  = EditorManager.getActiveEditor(),
-            sWidget       = new SnippetWidget(activeEditor, activeEditor.getCursorPos()),
-            exactMatch    = false;
+        var activeEditor    = EditorManager.getActiveEditor(),
+            sWidget         = new SnippetWidget(activeEditor, activeEditor.getCursorPos()),
+            exactMatch      = false,
+            hasAllVariables = false;
 
         // check what's on current line
         var currentLineNo = activeEditor.getCursorPos().line,
@@ -521,7 +539,7 @@ define(function (require, exports) {
         if (currentLine.match(/\S/)) {
             // if current line is not empty, try to search for a snippet
             var params = currentLine.trim().replace(/\s+/, " ").split(" "),
-                searchWith = params[0],
+                searchWith = params.shift(),
                 results = Snippets.search(searchWith);
             if (results.length > 0) {
                 sWidget.prefillSearch(searchWith);
@@ -530,16 +548,26 @@ define(function (require, exports) {
                 exactMatch = _.find(results, function (snippet) {
                     return snippet.name === searchWith;
                 });
+
                 if (exactMatch) {
+
+                    var variables = sWidget.getVariablesFromTemplate(exactMatch.template);
+                    variables = _.uniq(variables.map(function (v) { return v.num; }));
+
+                    if (variables.length <= params.length) {
+                        hasAllVariables = true;
+                    }
+
                     sWidget.onNextRender(function () {
+                        this.fillOutVariables(params);
                         this.insertSnippet();
                     });
-                }
 
+                }
             }
         }
 
-        if (exactMatch) {
+        if (exactMatch && hasAllVariables) {
             sWidget.detachedMode = true;
             sWidget.onAdded();
         } else {
