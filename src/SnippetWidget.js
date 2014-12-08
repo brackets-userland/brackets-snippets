@@ -3,14 +3,17 @@ define(function (require, exports) {
 
     // Brackets modules
     var _                 = brackets.getModule("thirdparty/lodash"),
+        CodeMirror        = brackets.getModule("thirdparty/CodeMirror2/lib/codemirror"),
         CommandManager    = brackets.getModule("command/CommandManager"),
         EditorManager     = brackets.getModule("editor/EditorManager"),
         Menus             = brackets.getModule("command/Menus"),
+        LanguageManager   = brackets.getModule("language/LanguageManager"),
         InlineWidget      = brackets.getModule("editor/InlineWidget").InlineWidget;
 
     // Local modules
     var ErrorHandler    = require("src/ErrorHandler"),
         Preferences     = require("src/Preferences"),
+        RunMode         = require("src/CodeMirrorRunMode"),
         SettingsDialog  = require("src/SettingsDialog"),
         Snippets        = require("src/Snippets"),
         Strings         = require("strings");
@@ -351,10 +354,18 @@ define(function (require, exports) {
         $snippetName.text(this.selectedSnippet.name);
         $snippetPath.text(this.selectedSnippet.fullPath || "-");
 
-        var escaped = _.escape(this.selectedSnippet.template),
-            variables = this.getVariablesFromTemplate(escaped);
+        var template = this.selectedSnippet.template,
+            variables = this.getVariablesFromTemplate(template);
+
+        if (CodeMirror.runMode && RunMode) {
+            var lang = LanguageManager.getLanguageForPath(this.hostEditor.document.file.fullPath);
+            CodeMirror.runMode(this.selectedSnippet.template, lang.getMode(), $pre[0]);
+        } else {
+            $pre.text(template);
+        }
 
         if (variables.length > 0) {
+            var currentHtml = $pre.html();
             variables.forEach(function (variable) {
                 var magicConstant = 2, // don't ask
                     w = magicConstant + (variable.name.length * CODEFONT_WIDTH_IN_PX) + "px";
@@ -362,11 +373,10 @@ define(function (require, exports) {
                                 " x-var-num='" + variable.num + "'" +
                                 " placeholder='" + variable.name + "'" +
                                 " style='width:" + w + "' />";
-                escaped = escaped.replace(variable.str, inputHtml);
+                currentHtml = currentHtml.replace(variable.str, inputHtml);
             });
+            $pre.html(currentHtml);
         }
-
-        $pre.html(escaped);
 
         if (this._onNextRender) {
             this._onNextRender();

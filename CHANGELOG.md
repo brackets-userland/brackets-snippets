@@ -1,5 +1,8 @@
 # Changelog
 
+## ??? (09/12/2014)
+* Snippets are now colored using CodeMirror mode for currently opened file.
+
 ## 0.2.1 (08/12/2014)
 * It is possible to prefill variables to widget, try typing `ng-directive myModule` and use alt-S
 * When all variables are prefilled, snippet is inserted automatically, try `ng-controller myModule myController` and use alt-S
