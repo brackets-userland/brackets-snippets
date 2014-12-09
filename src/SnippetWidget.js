@@ -21,6 +21,7 @@ define(function (require, exports) {
     // Constants
     var WIDGET_HEIGHT        = 150,
         CODEFONT_WIDTH_IN_PX = 8,
+        SELECTED_MARK        = "{{!selected}}",
         CURSOR_MARK          = "{{!cursor}}";
 
     // Templates
@@ -448,6 +449,42 @@ define(function (require, exports) {
         this._onNextRender = fn.bind(this);
     };
 
+    SnippetWidget.prototype._getCurrentIndent = function (selectedText, positionStart, positionEnd) {
+        var i,
+            ws,
+            doc             = this.hostEditor.document,
+            currentLine     = doc.getRange(positionStart, positionEnd),
+            lineBreakBefore = false,
+            indent          = "";
+
+        if (selectedText) {
+
+            ws = doc.getRange({ line: positionStart.line, ch: 0 }, positionStart);
+            i = ws.length;
+            while (i--) { indent += " "; }
+
+        } else if (currentLine.match(/\S/)) {
+
+            if (!this.prefilledSearch) {
+                lineBreakBefore = true;
+            }
+
+            ws = currentLine.match(/^\s+/);
+            indent = ws ? ws[0] : "";
+
+        } else {
+
+            i = this.originalCursorPosition.ch;
+            while (i--) { indent += " "; }
+
+        }
+
+        return {
+            indent: indent,
+            lineBreakBefore: lineBreakBefore
+        };
+    };
+
     SnippetWidget.prototype.insertSnippet = function () {
         if (this.hasUnfilledVariables()) {
             return;
@@ -459,33 +496,28 @@ define(function (require, exports) {
             positionStart     = { line: origLine, ch: 0 },
             positionEnd       = { line: origLine, ch: 999 },
             snippetCursorLine = null,
-            snippetCursorCh   = null;
+            snippetCursorCh   = null,
+            indentFirstLine   = true;
+
+        // if something in editor is selected, use that to replace
+        var selectedText = this.hostEditor.getSelectedText();
+        if (selectedText) {
+            indentFirstLine = false;
+            var sel = this.hostEditor.getSelection();
+            positionStart = sel.start;
+            positionEnd   = sel.end;
+        }
 
         textToInsert = this.fillVariablesFromInputs(textToInsert);
 
-        var currentLine     = doc.getRange(positionStart, positionEnd),
-            nextLine        = doc.getRange(
+        var nextLine        = doc.getRange(
                 { line: origLine + 1, ch: 0 },
                 { line: origLine + 1, ch: 999 }
             ),
-            indent          = "",
-            lineBreakBefore = false,
+            indentInfo      = this._getCurrentIndent(selectedText, positionStart, positionEnd),
+            indent          = indentInfo.indent,
+            lineBreakBefore = indentInfo.lineBreakBefore,
             lineBreakAfter  = false;
-
-        // if line is not empty
-        if (currentLine.match(/\S/)) {
-
-            if (!this.prefilledSearch) {
-                lineBreakBefore = true;
-            }
-
-            var ws = currentLine.match(/^\s+/);
-            indent = ws ? ws[0] : "";
-
-        } else {
-            var i = this.originalCursorPosition.ch;
-            while (i--) { indent += " "; }
-        }
 
         // add prepends and appends
         if (this.snippetPrepend) {
@@ -501,10 +533,52 @@ define(function (require, exports) {
             textToInsert += "\n";
         }
 
+        // replace {{!selected}} with currently selected text
+        var lines;
+        var io = textToInsert.indexOf(SELECTED_MARK);
+        if (io !== -1) {
+
+            // we need to calculate indent of SELECTED_MARK
+            var selectedMarkIndent = "";
+            textToInsert.split("\n").forEach(function (line) {
+                if (line.indexOf(SELECTED_MARK)) {
+                    var m = line.match(/^\s+/);
+                    if (m) {
+                        selectedMarkIndent = m[0];
+                    }
+                }
+            });
+
+            // original whitespace needs to be removed from selectedText
+            // add selectedMarkIndent whitespace
+            var minWhitespaceLength = 999;
+            lines = this.selectedText.split("\n");
+            lines.forEach(function (line) {
+                var m = line.match(/^\s+/);
+                if (m && m[0].length < minWhitespaceLength) {
+                    minWhitespaceLength = m[0].length;
+                }
+            });
+            this.selectedText = lines.map(function (line, index) {
+                var m = line.match(/^\s+/);
+                if (m) {
+                    line = line.substring(minWhitespaceLength);
+                }
+                if (index !== 0) {
+                    line = selectedMarkIndent + line;
+                }
+                return line;
+            }).join("\n");
+
+            textToInsert = textToInsert.replace(SELECTED_MARK, this.selectedText);
+        }
+
         // indent all lines of the snippet with current indentation
-        var lines = textToInsert.split("\n");
+        lines = textToInsert.split("\n");
         textToInsert = lines.map(function (line, index) {
-            line = indent + line;
+            if (index !== 0 || index === 0 && indentFirstLine) {
+                line = indent + line;
+            }
             // check if cursor belongs here
             var cio = line.indexOf(CURSOR_MARK);
             if (cio !== -1) {
@@ -561,12 +635,16 @@ define(function (require, exports) {
             sWidget               = new SnippetWidget(activeEditor, activeEditor.getCursorPos()),
             exactMatches          = [],
             exactMatchesParams    = [],
-            exactMatchesParamsMax = -1;
+            exactMatchesParamsMax = -1,
+            selectedText          = activeEditor.getSelectedText();
 
-        // check what's on current line
+        // attach selectedText to widget
+        sWidget.selectedText = selectedText;
+
+        // check what's on current line (skip if using selectedText mode)
         var currentLineNo = activeEditor.getCursorPos().line,
             currentLine   = activeEditor.document.getRange({ line: currentLineNo, ch: 0 }, { line: currentLineNo, ch: 999 });
-        if (currentLine.match(/\S/)) {
+        if (!selectedText && currentLine.match(/\S/)) {
 
             // if current line is not empty, try to search for a snippet
             var params            = currentLine.trim().replace(/\s+/, " ").split(" "),
@@ -625,17 +703,19 @@ define(function (require, exports) {
                 prefillVars = params.slice(params.indexOf(prefillSearchStr) + 1);
             }
 
-            if (prefillVars) {
-                sWidget.onNextRender(function () {
-                    this.fillOutVariables(prefillVars);
-                    this.insertSnippet();
-                });
-            }
-
             if (prefillSearchStr) {
+
                 var beforeString = params.slice(0, params.indexOf(prefillSearchStr)).join(" ");
                 var afterString = params.slice(params.indexOf(prefillSearchStr) + prefillVars.length + 1).join(" ");
                 sWidget.prefillSearch(prefillSearchStr, beforeString, afterString);
+
+                if (prefillVars) {
+                    sWidget.onNextRender(function () {
+                        this.fillOutVariables(prefillVars);
+                        this.insertSnippet();
+                    });
+                }
+
             }
 
         }

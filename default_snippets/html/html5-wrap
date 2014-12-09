@@ -1,0 +1,3 @@
+<div>
+  {{!selected}}{{!cursor}}
+</div>

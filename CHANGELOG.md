@@ -4,6 +4,7 @@
 * Snippets are now colored using CodeMirror mode for currently opened file.
 * When focusing into snippet variables, the area scrolls so the variable is in the view.
 * Improved algorithm for matching snippets from current line.
+* Currently selected text will fill out special variable `{{!selected}}` if present in the chosen snippet.
 
 ## 0.2.1 (08/12/2014)
 * It is possible to prefill variables to widget, try typing `ng-directive myModule` and use alt-S
