@@ -397,7 +397,7 @@ define(function (require, exports) {
         this.$currentSnippetArea.find(":input").each(function () {
             var $this = $(this),
                 num   = parseInt($this.attr("x-var-num"), 10);
-            $this.val(params[num - 1]);
+            $this.val(params[num - 1]).trigger("blur");
         });
     };
 
@@ -437,9 +437,11 @@ define(function (require, exports) {
         return text;
     };
 
-    SnippetWidget.prototype.prefillSearch = function (str) {
+    SnippetWidget.prototype.prefillSearch = function (str, prepend, append) {
         this.$searchInput.val(str);
         this.prefilledSearch = true;
+        this.snippetPrepend = prepend;
+        this.snippetAppend = append;
     };
 
     SnippetWidget.prototype.onNextRender = function (fn) {
@@ -483,6 +485,14 @@ define(function (require, exports) {
         } else {
             var i = this.originalCursorPosition.ch;
             while (i--) { indent += " "; }
+        }
+
+        // add prepends and appends
+        if (this.snippetPrepend) {
+            textToInsert = this.snippetPrepend + " " + textToInsert;
+        }
+        if (this.snippetAppend) {
+            textToInsert = textToInsert + " " + this.snippetAppend;
         }
 
         // check if we need to insert a new line after the snippet
@@ -547,46 +557,90 @@ define(function (require, exports) {
     };
 
     function triggerWidget() {
-        var activeEditor    = EditorManager.getActiveEditor(),
-            sWidget         = new SnippetWidget(activeEditor, activeEditor.getCursorPos()),
-            exactMatch      = false,
-            hasAllVariables = false;
+        var activeEditor          = EditorManager.getActiveEditor(),
+            sWidget               = new SnippetWidget(activeEditor, activeEditor.getCursorPos()),
+            exactMatches          = [],
+            exactMatchesParams    = [],
+            exactMatchesParamsMax = -1;
 
         // check what's on current line
         var currentLineNo = activeEditor.getCursorPos().line,
             currentLine   = activeEditor.document.getRange({ line: currentLineNo, ch: 0 }, { line: currentLineNo, ch: 999 });
         if (currentLine.match(/\S/)) {
+
             // if current line is not empty, try to search for a snippet
-            var params = currentLine.trim().replace(/\s+/, " ").split(" "),
-                searchWith = params.shift(),
-                results = Snippets.search(searchWith);
-            if (results.length > 0) {
-                sWidget.prefillSearch(searchWith);
+            var params            = currentLine.trim().replace(/\s+/, " ").split(" "),
+                prefillSearchStr  = null,
+                prefillVars       = null;
+
+            params.forEach(function (param, index) {
+                var possibleVariables = params.slice(index + 1),
+                    results           = Snippets.search(param);
+
+                if (results.length === 0) {
+                    return;
+                }
+
+                // prefill with the first string that returns some results
+                if (prefillSearchStr === null) {
+                    prefillSearchStr = param;
+                }
 
                 // see if we have an exact match
-                exactMatch = _.find(results, function (snippet) {
-                    return snippet.name === searchWith;
+                var exactMatchCandidate = _.find(results, function (snippet) {
+                    return snippet.name === param;
                 });
 
-                if (exactMatch) {
-
-                    var variables = sWidget.getVariablesFromTemplate(exactMatch.template);
+                if (exactMatchCandidate) {
+                    var variables = sWidget.getVariablesFromTemplate(exactMatchCandidate.template);
                     variables = _.uniq(variables.map(function (v) { return v.num; }));
 
-                    if (variables.length <= params.length) {
-                        hasAllVariables = true;
+                    if (variables.length < possibleVariables.length) {
+                        possibleVariables = possibleVariables.slice(0, variables.length);
                     }
 
-                    sWidget.onNextRender(function () {
-                        this.fillOutVariables(params);
-                        this.insertSnippet();
-                    });
-
+                    if (variables.length === possibleVariables.length) {
+                        exactMatches.push(exactMatchCandidate);
+                        exactMatchesParams.push(possibleVariables);
+                        if (possibleVariables.length > exactMatchesParamsMax) {
+                            exactMatchesParamsMax = possibleVariables.length;
+                        }
+                    }
                 }
+            });
+
+            if (exactMatches.length > 0) {
+                // get the latest 'exactMatch' with the 'exactMatchesParamsMax' parameters
+                var i = exactMatches.length;
+                while (i--) {
+                    if (exactMatchesParams[i].length === exactMatchesParamsMax) {
+                        break;
+                    }
+                }
+                // prefill the search with it and fill out variables
+                prefillSearchStr = exactMatches[i].name;
+                prefillVars = exactMatchesParams[i];
+            } else {
+                // not the exact match, but we can still prefill some variables
+                prefillVars = params.slice(params.indexOf(prefillSearchStr) + 1);
             }
+
+            if (prefillVars) {
+                sWidget.onNextRender(function () {
+                    this.fillOutVariables(prefillVars);
+                    this.insertSnippet();
+                });
+            }
+
+            if (prefillSearchStr) {
+                var beforeString = params.slice(0, params.indexOf(prefillSearchStr)).join(" ");
+                var afterString = params.slice(params.indexOf(prefillSearchStr) + prefillVars.length + 1).join(" ");
+                sWidget.prefillSearch(prefillSearchStr, beforeString, afterString);
+            }
+
         }
 
-        if (exactMatch && hasAllVariables) {
+        if (exactMatches.length > 0) {
             sWidget.detachedMode = true;
             sWidget.onAdded();
         } else {
