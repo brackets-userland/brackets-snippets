@@ -13,7 +13,6 @@ define(function (require, exports) {
     // Local modules
     var ErrorHandler    = require("src/ErrorHandler"),
         Preferences     = require("src/Preferences"),
-        RunMode         = require("src/CodeMirrorRunMode"),
         SettingsDialog  = require("src/SettingsDialog"),
         Snippets        = require("src/Snippets"),
         Strings         = require("strings");
@@ -376,7 +375,7 @@ define(function (require, exports) {
         var template = this.selectedSnippet.template,
             variables = this.getVariablesFromTemplate(template);
 
-        if (CodeMirror.runMode && RunMode) {
+        if (CodeMirror.runMode) {
             var lang = LanguageManager.getLanguageForPath(this.hostEditor.document.file.fullPath);
             CodeMirror.runMode(this.selectedSnippet.template, lang.getMode(), $pre[0]);
         } else {
