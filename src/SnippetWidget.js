@@ -539,6 +539,7 @@ define(function (require, exports) {
                 { line: origLine + 1, ch: 0 },
                 { line: origLine + 1, ch: 999 }
             ),
+            afterCursor     = doc.getRange(this.originalCursorPosition, positionEnd),
             indentInfo      = this._getCurrentIndent(selectedText, positionStart, positionEnd),
             indent          = indentInfo.indent,
             lineBreakBefore = indentInfo.lineBreakBefore,
@@ -553,7 +554,7 @@ define(function (require, exports) {
         }
 
         // check if we need to insert a new line after the snippet
-        if (nextLine.match(/\S/)) {
+        if (nextLine.match(/\S/) || afterCursor.match(/\S/)) {
             lineBreakAfter = true;
             textToInsert += "\n";
         }
@@ -618,7 +619,8 @@ define(function (require, exports) {
         if (lineBreakBefore) {
             textToInsert = "\n" + textToInsert;
             lines.length += 1;
-            doc.replaceRange(textToInsert, positionEnd);
+            // place text on originalCursorPosition
+            doc.replaceRange(textToInsert, this.originalCursorPosition);
         } else {
             // replace whole line as lineBreakBefore false means current line contains only whitespace
             doc.replaceRange(textToInsert, positionStart, positionEnd);
