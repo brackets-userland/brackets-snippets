@@ -268,7 +268,16 @@ define(function (require, exports) {
         var query = this.$searchInput.val();
         if (force || query !== this.lastQuery || typeof this.lastQuery !== "string") {
             this.lastQuery = query;
-            this.snippets = Snippets.search(query);
+
+            if (this.detachedMode) {
+                var lookingFor = this.$searchInput.val();
+                this.snippets = [_.find(Snippets.getAll(), function (snippet) {
+                    return snippet.name === lookingFor;
+                })];
+            } else {
+                this.snippets = Snippets.search(query);
+            }
+
             this.$snippetsList.html(Mustache.render(snippetWidgetListTemplate, {
                 snippets: this.snippets,
                 Strings: Strings
@@ -709,7 +718,7 @@ define(function (require, exports) {
                 var afterString = params.slice(params.indexOf(prefillSearchStr) + prefillVars.length + 1).join(" ");
                 sWidget.prefillSearch(prefillSearchStr, beforeString, afterString);
 
-                if (prefillVars) {
+                if (prefillVars && prefillVars.length > 0) {
                     sWidget.onNextRender(function () {
                         this.fillOutVariables(prefillVars);
                         this.insertSnippet();
