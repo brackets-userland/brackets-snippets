@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 (10/12/2014)
+* Fixed CodeMirror breaking snippet variables.
+* Fixed a case when invalid snippet was executed from a current line.
+
 ## 0.3.0 (09/12/2014)
 * Snippets are now colored using CodeMirror mode for currently opened file.
 * When focusing into snippet variables, the area scrolls so the variable is in the view.
