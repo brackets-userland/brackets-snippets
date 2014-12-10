@@ -376,8 +376,25 @@ define(function (require, exports) {
             variables = this.getVariablesFromTemplate(template);
 
         if (CodeMirror.runMode) {
+
+            // we need to temporarily replace variables with comething CodeMirror won't touch
+            variables.forEach(function (variable, index) {
+                // 57344 = 0xE000 - Private Use Areas first character
+                template = template.replace(variable.str, String.fromCharCode(57344 + index));
+            });
+
+            var $temp = $("<div>");
             var lang = LanguageManager.getLanguageForPath(this.hostEditor.document.file.fullPath);
-            CodeMirror.runMode(this.selectedSnippet.template, lang.getMode(), $pre[0]);
+            CodeMirror.runMode(template, lang.getMode(), $temp[0]);
+            var html = $temp.html();
+
+            // now convert back to variable strings after being formatted by CodeMirror
+            html = html.replace(/[\uE000-\uE0FF]/g, function (a) {
+                return variables[a.charCodeAt(0) - 57344].str;
+            });
+
+            $pre.html(html);
+
         } else {
             $pre.text(template);
         }
