@@ -32,8 +32,19 @@ define(function (require, exports, module) {
                 // successfully loaded file from disk
                 var s = new Snippet();
                 s.name = file.name;
-                s.template = content;
                 s.fullPath = fullPath;
+                s.meta = {};
+
+                // extract meta from content
+                var lines = content.split("\n");
+                while (lines.length > 0 && lines[0].match(/^##/)) {
+                    var m = lines.shift().match(/^##([a-zA-Z0-9]+)\s*:(.*)/);
+                    if (m) {
+                        s.meta[m[1]] = m[2].trim();
+                    }
+                }
+                s.template = lines.join("\n");
+
                 resolve(s);
 
             });

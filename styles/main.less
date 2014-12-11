@@ -12,7 +12,7 @@
     left: 40px;
     right: 10px;
     top: 10px;
-    bottom: 10px;
+    bottom: 8px;
 
     .btn-group-vertical {
         position: absolute;
@@ -25,15 +25,22 @@
     }
 
     .left-column {
-        float: left;
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 220px;
 
         .snippets-list {
-            position: relative; // !important
-            border: 1px solid @borderColor;
-            max-height: 90px;
-            max-width: 218px;
+            position: absolute;
+            top: 35px;
+            bottom: 0;
+            left: 0;
+            right: 0;
+
             overflow-x: hidden;
             overflow-y: scroll;
+            border: 1px solid @borderColor;
 
             &.is-empty {
                 border: none;
@@ -57,12 +64,19 @@
         position: absolute;
         left: 220px;
         right: 0;
+        top: 0;
+        bottom: 0;
 
         .current-snippet {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
             margin: 0 1em;
 
             .snippet-header {
-                margin-bottom: 0.5em;
+                margin-bottom: 0.2em;
                 color: @borderColor;
                 white-space: nowrap;
                 overflow: hidden;
@@ -82,11 +96,19 @@
                 }
             }
 
+            .snippet-meta {
+                margin-bottom: 0.2em;
+                color: @borderColor;
+            }
+
             pre {
+                position: absolute;
+                top: 35px;
+                bottom: 0;
+                left: 0;
+                right: 0;
                 background-color: @codeEditorBackground;
                 border: 1px solid @borderColor;
-                min-height: 106px;
-                max-height: 106px;
                 overflow-y: scroll;
 
                 .variable {

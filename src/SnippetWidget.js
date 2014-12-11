@@ -286,6 +286,14 @@ define(function (require, exports) {
         }
     };
 
+    SnippetWidget.prototype.animationInProgress = function () {
+        return this.$htmlContent.hasClass("animating");
+    };
+
+    SnippetWidget.prototype.afterAnimation = function () {
+        this.selectSnippet();
+    };
+
     SnippetWidget.prototype.selectSnippet = function (snippet) {
         if (snippet) {
             // if a snippet was passed, explicitly set this snippet as selected
@@ -311,7 +319,9 @@ define(function (require, exports) {
                 .find("[x-snippet-path='" + this.selectedSnippet.fullPath + "']")
                 .addClass("selected");
             // this will scroll $snippetsList so $selected is in view
-            scrollParentToChild(this.$snippetsList, $selected);
+            if (!this.animationInProgress()) {
+                scrollParentToChild(this.$snippetsList, $selected);
+            }
         }
         this.renderSnippet();
     };
@@ -357,6 +367,7 @@ define(function (require, exports) {
     SnippetWidget.prototype.renderSnippet = function () {
         var $snippetName  = this.$currentSnippetArea.find(".snippet-name"),
             $snippetPath  = this.$currentSnippetArea.find(".snippet-path"),
+            $snippetMeta  = this.$currentSnippetArea.find(".snippet-meta"),
             $pre          = this.$currentSnippetArea.children("pre"),
             isSnippetSelected = !!this.selectedSnippet;
 
@@ -371,6 +382,13 @@ define(function (require, exports) {
 
         $snippetName.text(this.selectedSnippet.name);
         $snippetPath.text(this.selectedSnippet.fullPath || "-");
+
+        var meta = this.selectedSnippet.meta;
+        if (!_.isEmpty(meta)) {
+            $snippetMeta.text(JSON.stringify(meta, null, 1).replace(/\n/g, " ").replace(/\s+/g, " "));
+        } else {
+            $snippetMeta.text("");
+        }
 
         var template = this.selectedSnippet.template,
             variables = this.getVariablesFromTemplate(template);
@@ -751,7 +769,9 @@ define(function (require, exports) {
             sWidget.detachedMode = true;
             sWidget.onAdded();
         } else {
-            activeEditor.addInlineWidget(activeEditor.getCursorPos(), sWidget, true);
+            activeEditor.addInlineWidget(activeEditor.getCursorPos(), sWidget, true).done(function () {
+                sWidget.afterAnimation();
+            });
         }
     }
 
