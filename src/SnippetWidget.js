@@ -194,18 +194,18 @@ define(function (require, exports) {
             var newSnippet = new Snippet();
             newSnippet.name = self.$searchInput.val().trim();
 
-            Snippets.addNewSnippetDialog(newSnippet)
-                .then(function () {
-                    refresh();
-                });
+            Snippets.editSnippetDialog(newSnippet).then(function (savedSnippet) {
+                self.selectedSnippet = savedSnippet;
+                refresh();
+            });
         });
 
         // event for snippet editing
         this.$editSnippetBtn.on("click", function () {
-            Snippets.editSnippetDialog(self.selectedSnippet)
-                .then(function () {
-                    refresh();
-                });
+            Snippets.editSnippetDialog(self.selectedSnippet).then(function (savedSnippet) {
+                self.selectedSnippet = savedSnippet;
+                refresh();
+            });
         });
 
         // event for snippet deleting

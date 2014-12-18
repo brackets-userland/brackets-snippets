@@ -45,23 +45,39 @@ define(function (require, exports, module) {
 
     // saves the snippet to the disk (create or update)
     Snippet.prototype.save = function () {
+        var self    = this,
+            promise = null;
+
+        if (self.fullPath === null) {
+            // creating
+            promise = self._createSnippetFile();
+        } else {
+            var renameRequired = self.name !== FileSystem.getFileForPath(self.fullPath).name;
+            if (renameRequired) {
+                promise = self._renameSnippetFile().then(function () {
+                    return self._rewriteSnippetFile();
+                });
+            } else {
+                promise = self._rewriteSnippetFile();
+            }
+        }
+
+        return promise.then(function () {
+            return self;
+        });
+    };
+
+    Snippet.prototype._createSnippetFile = function () {
+        var self = this;
         return new Promise(function (resolve, reject) {
 
-            var creating = false,
-                updating = false;
+            self.fullPath = Preferences.get("defaultSnippetDirectory") + self.name;
 
-            if (this.fullPath === null) {
-                creating = true;
-                this.fullPath = Preferences.get("defaultSnippetDirectory") + this.name;
-            } else {
-                updating = true;
-            }
-
-            FileSystem.resolve(this.fullPath, function (err) {
+            FileSystem.resolve(self.fullPath, function (err) {
 
                 // NotFound is desired here, because we should be writing new file to disk
-                if (creating && err === "NotFound") {
-                    FileSystem.getFileForPath(this.fullPath).write(this.createFileContent(), function (err) {
+                if (err === "NotFound") {
+                    FileSystem.getFileForPath(self.fullPath).write(self.createFileContent(), function (err) {
 
                         // error writing the file to disk
                         if (err) {
@@ -71,7 +87,7 @@ define(function (require, exports, module) {
                         }
 
                         // successfully saved new snippet to disk
-                        resolve(this);
+                        resolve();
 
                     });
                     return;
@@ -85,22 +101,27 @@ define(function (require, exports, module) {
                 }
 
                 // no error resolving the file, it already exists
-                ErrorHandler.show("File already exists: " + this.fullPath);
+                ErrorHandler.show("File already exists: " + self.fullPath);
                 reject();
 
-            }.bind(this));
+            });
 
-        }.bind(this));
+        }).catch(function (err) {
+
+            self.fullPath = null;
+            throw err;
+
+        });
     };
 
-    Snippet.prototype.rename = function (newName) {
+    Snippet.prototype._renameSnippetFile = function () {
         var self = this;
         return new Promise(function (resolve, reject) {
 
             // decide on the new name
             var split = self.fullPath.split("/");
             split.pop(); // removes old name
-            split.push(newName); // adds new name
+            split.push(self.name); // adds new name
             var newFullPath = split.join("/");
 
             FileSystem.resolve(self.fullPath, function (err, file) {
@@ -128,18 +149,15 @@ define(function (require, exports, module) {
                         return;
                     }
 
-                    self.name = newName;
                     self.fullPath = newFullPath;
                     resolve();
 
                 });
-
             });
-
         });
     };
 
-    Snippet.prototype.rewrite = function (newTemplate) {
+    Snippet.prototype._rewriteSnippetFile = function () {
         var self = this;
         return new Promise(function (resolve, reject) {
 
@@ -152,7 +170,7 @@ define(function (require, exports, module) {
                     return;
                 }
 
-                file.write(newTemplate, function (err) {
+                file.write(self.createFileContent(), function (err) {
 
                     // error writing to the snippet file
                     if (err) {
@@ -161,39 +179,10 @@ define(function (require, exports, module) {
                         return;
                     }
 
-                    self.template = newTemplate;
                     resolve();
 
                 });
-
             });
-
-        });
-    };
-
-    Snippet.prototype.update = function (name, template) {
-        var self = this;
-        return new Promise(function (resolve) {
-
-            var renameRequired  = self.name !== name;
-            var rewriteRequired = self.template !== template;
-
-            if (renameRequired) {
-                self.rename(name).then(function () {
-                    if (rewriteRequired) {
-                        self.rewrite(template).then(function () {
-                            resolve();
-                        });
-                    }
-                });
-            } else if (rewriteRequired) {
-                self.rewrite(template).then(function () {
-                    resolve();
-                });
-            } else {
-                resolve();
-            }
-
         });
     };
 

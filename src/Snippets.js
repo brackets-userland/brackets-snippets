@@ -58,6 +58,13 @@ define(function (require, exports, module) {
         SnippetCollection.push(snippet);
     }
 
+    function removeFromCollection(snippet) {
+        var io = SnippetCollection.indexOf(snippet);
+        if (io !== -1) {
+            SnippetCollection.splice(io, 1);
+        }
+    }
+
     // this should delete only the snippets in the default snippet directory
     function deleteAll() {
         var promises = [],
@@ -93,24 +100,13 @@ define(function (require, exports, module) {
             });
     }
 
-    function editSnippetDialog(snippet) {
-        if (SnippetCollection.indexOf(snippet) === -1) {
-            ErrorHandler.show("editSnippetDialog(): snippet is not part of the SnippetCollection");
-            return;
-        }
-        return SnippetDialog.show(snippet, function (newValues) {
-            // dialog should only be closed, if this promise is resolved
-            var name     = newValues.name,
-                template = newValues.template;
-            return snippet.update(name, template);
-        });
-    }
-
-    function addNewSnippetDialog(snippet) {
-        return SnippetDialog.show(snippet, function (newSnippet) {
+    function editSnippetDialog(oldSnippet) {
+        return SnippetDialog.show(oldSnippet, function (newSnippet) {
             // dialog should only be closed, if this promise is resolved
             return newSnippet.save().then(function () {
-                SnippetCollection.push(newSnippet);
+                removeFromCollection(oldSnippet);
+                addToCollection(newSnippet);
+                return newSnippet;
             });
         });
     }
@@ -315,7 +311,6 @@ define(function (require, exports, module) {
     exports.clearAll                    = deleteAll;
     exports.getAll                      = getAll;
     exports.search                      = search;
-    exports.addNewSnippetDialog         = addNewSnippetDialog;
     exports.editSnippetDialog           = editSnippetDialog;
     exports.deleteSnippetDialog         = deleteSnippetDialog;
     exports.deleteAllSnippetsDialog     = deleteAllSnippetsDialog;
