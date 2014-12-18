@@ -288,22 +288,6 @@ define(function (require, exports, module) {
             })
             .then(function () {
                 return _loadSnippetsFromDirectories();
-            })
-            .then(function () {
-                // migration from old snippets store
-                var sc = Preferences.get("SnippetsCollection");
-                if (Array.isArray(sc) && sc.length > 0) {
-                    sc.forEach(function (oldSnippet) {
-
-                        Snippet
-                            .create(oldSnippet.name, oldSnippet.template)
-                            .then(function (snippet) {
-                                SnippetCollection.push(snippet);
-                            });
-
-                    });
-                }
-                Preferences.set("SnippetsCollection", null);
             });
     }
 
