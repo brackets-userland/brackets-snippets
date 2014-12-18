@@ -30,13 +30,15 @@
         top: 0;
         bottom: 0;
         width: 220px;
+        display: flex;
+        flex-direction: column;
+
+        .snippet-search-container {
+            margin-bottom: 1em;
+        }
 
         .snippets-list {
-            position: absolute;
-            top: 35px;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            flex-grow: 1;
 
             overflow-x: hidden;
             overflow-y: scroll;
@@ -68,6 +70,8 @@
         bottom: 0;
 
         .current-snippet {
+            display: flex;
+            flex-direction: column;
             position: absolute;
             left: 0;
             right: 0;
@@ -76,6 +80,7 @@
             margin: 0 1em;
 
             .snippet-header {
+                flex-shrink: 0;
                 margin-bottom: 0.2em;
                 color: @borderColor;
                 white-space: nowrap;
@@ -97,31 +102,42 @@
             }
 
             .snippet-meta {
+                flex-shrink: 0;
                 margin-bottom: 0.2em;
                 color: @borderColor;
             }
 
-            pre {
-                position: absolute;
-                top: 35px;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background-color: @codeEditorBackground;
-                border: 1px solid @borderColor;
-                overflow-y: scroll;
+            .snippet-content {
+                flex-grow: 1;
+                overflow-x: auto;
+                overflow-y: auto;
 
-                .variable {
-                    .code-font();
-                    box-sizing: border-box;
-                    padding: 0;
-                    margin: 0;
-                    position: relative;
-                    top: -1px;
+                &.can-scroll-top {
+                    border-top: 1px solid @borderColor;
+                }
 
-                    &.required {
-                        border-color: @colorError;
-                        box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.06), 0 0 0 1px @colorError;
+                &.can-scroll-bottom {
+                    border-bottom: 1px solid @borderColor;
+                }
+
+                pre {
+                    // background-color: @codeEditorBackground;
+                    // border: 1px solid @borderColor;
+                    padding-top: 2px;
+                    padding-bottom: 2px;
+
+                    .variable {
+                        .code-font();
+                        box-sizing: border-box;
+                        padding: 0;
+                        margin: 0;
+                        position: relative;
+                        top: -1px;
+
+                        &.required {
+                            border-color: @colorError;
+                            box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.06), 0 0 0 1px @colorError;
+                        }
                     }
                 }
             }

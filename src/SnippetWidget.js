@@ -18,10 +18,12 @@ define(function (require, exports) {
         Strings         = require("strings");
 
     // Constants
-    var WIDGET_HEIGHT        = 150,
-        CODEFONT_WIDTH_IN_PX = 8,
-        SELECTED_MARK        = "{{!selected}}",
-        CURSOR_MARK          = "{{!cursor}}";
+    var WIDGET_MIN_HEIGHT     = 150,
+        WIDGET_MAX_HEIGHT     = 300,
+        CODEFONT_BORDER_IN_PX = 2,
+        CODEFONT_WIDTH_IN_PX  = 8.4,
+        SELECTED_MARK         = "{{!selected}}",
+        CURSOR_MARK           = "{{!cursor}}";
 
     // Templates
     var snippetWidgetTemplate     = require("text!templates/SnippetWidget.html"),
@@ -49,7 +51,7 @@ define(function (require, exports) {
     SnippetWidget.prototype.parentClass = InlineWidget.prototype;
 
     // default height for the widget
-    SnippetWidget.prototype.height = WIDGET_HEIGHT;
+    SnippetWidget.prototype.height = WIDGET_MIN_HEIGHT;
 
     // generate html for the widget
     SnippetWidget.prototype.load = function (hostEditor) {
@@ -228,13 +230,13 @@ define(function (require, exports) {
 
         // event for resizing variable inputs
         var resizeInput = function ($input, length) {
-            $input.width(length * CODEFONT_WIDTH_IN_PX);
+            $input.width(CODEFONT_BORDER_IN_PX + length * CODEFONT_WIDTH_IN_PX);
             $input.removeClass("required");
         };
         this.$currentSnippetArea
             .on("focus", ".variable", function () {
                 var $this = $(this);
-                scrollParentToChild($this.parents("pre").first(), $this);
+                scrollParentToChild($this.parents(".snippet-content").first(), $this);
             })
             .on("keypress", ".variable", function () {
                 var $this = $(this),
@@ -368,7 +370,7 @@ define(function (require, exports) {
         var $snippetName  = this.$currentSnippetArea.find(".snippet-name"),
             $snippetPath  = this.$currentSnippetArea.find(".snippet-path"),
             $snippetMeta  = this.$currentSnippetArea.find(".snippet-meta"),
-            $pre          = this.$currentSnippetArea.children("pre"),
+            $pre          = this.$currentSnippetArea.find(".snippet-content").children("pre"),
             isSnippetSelected = !!this.selectedSnippet;
 
         $pre.toggle(isSnippetSelected);
@@ -420,12 +422,11 @@ define(function (require, exports) {
         if (variables.length > 0) {
             var currentHtml = $pre.html();
             variables.forEach(function (variable) {
-                var magicConstant = 2, // don't ask
-                    w = magicConstant + (variable.name.length * CODEFONT_WIDTH_IN_PX) + "px";
+                var w = CODEFONT_BORDER_IN_PX + variable.name.length * CODEFONT_WIDTH_IN_PX;
                 var inputHtml = "<input class='variable' type='text'" +
                                 " x-var-num='" + variable.num + "'" +
                                 " placeholder='" + variable.name + "'" +
-                                " style='width:" + w + "' />";
+                                " style='width:" + w + "px;' />";
                 currentHtml = currentHtml.replace(variable.str, inputHtml);
             });
             $pre.html(currentHtml);
@@ -434,6 +435,25 @@ define(function (require, exports) {
         if (this._onNextRender) {
             this._onNextRender();
             delete this._onNextRender;
+        }
+
+        // calculate the snippet widget height between WIDGET_MIN_HEIGHT and WIDGET_MAX_HEIGHT
+        if (!this.animationInProgress()) {
+            var currentHeight = this.$htmlContent.height();
+            var borders = currentHeight - $pre.parent().outerHeight();
+            currentHeight = $pre.outerHeight() + borders;
+            if (currentHeight > WIDGET_MAX_HEIGHT) { currentHeight = WIDGET_MAX_HEIGHT; }
+            if (currentHeight < WIDGET_MIN_HEIGHT) { currentHeight = WIDGET_MIN_HEIGHT; }
+            this.$htmlContent.height(currentHeight);
+
+            // calculate if the .snippet-content is scrollable and add scroll classes
+            this.$currentSnippetArea.find(".snippet-content").off("scroll").on("scroll", function (evt) {
+                var $el = $(evt.target);
+                var scrollTop = $el.scrollTop();
+                var scrollBottom = $el[0].scrollHeight - $el.height() - scrollTop;
+                $el.toggleClass("can-scroll-top", scrollTop > 3);
+                $el.toggleClass("can-scroll-bottom", scrollBottom > 3);
+            }).trigger("scroll");
         }
     };
 

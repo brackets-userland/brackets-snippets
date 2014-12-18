@@ -6,7 +6,9 @@
         <button class="btn btn-mini snippets-settings" title="Settings">S</button>
     </div>
     <div class="left-column">
-        <input type="text" class="snippet-search-input" />
+        <div class="snippet-search-container">
+            <input type="text" class="snippet-search-input" />
+        </div>
         <div class="snippets-list">
             <!-- content for this is rendered through SnippetWidgetList.html template -->
         </div>
@@ -18,7 +20,9 @@
                 <span class="snippet-path"></span>
             </div>
             <div class="snippet-meta"></div>
-            <pre></pre>
+            <div class="snippet-content">
+                <pre></pre>
+            </div>
         </div>
     </div>
 </div>
