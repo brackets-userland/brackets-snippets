@@ -14,6 +14,7 @@ define(function (require, exports) {
     var ErrorHandler    = require("src/ErrorHandler"),
         Preferences     = require("src/Preferences"),
         SettingsDialog  = require("src/SettingsDialog"),
+        Snippet         = require("src/Snippet"),
         Snippets        = require("src/Snippets"),
         Strings         = require("strings");
 
@@ -190,7 +191,9 @@ define(function (require, exports) {
 
         // add event for new snippet
         this.$htmlContent.find(".new-snippet").on("click", function () {
-            var newSnippet = { name: self.$searchInput.val().trim() };
+            var newSnippet = new Snippet();
+            newSnippet.name = self.$searchInput.val().trim();
+
             Snippets.addNewSnippetDialog(newSnippet)
                 .then(function () {
                     refresh();

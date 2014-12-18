@@ -33,7 +33,7 @@ define(function (require, exports) {
         }
 
         if (snippet.template) {
-            $snippetEditor.val(snippet.getFileContent());
+            $snippetEditor.val(snippet.createFileContent());
         }
 
         $snippetName.on("keyup change", function () {
@@ -41,7 +41,7 @@ define(function (require, exports) {
         });
 
         $snippetEditor.on("keyup change", function () {
-            snippet.template = $(this).val().trim();
+            snippet.parseFileContent($(this).val().trim());
         });
 
         $dialog.find(".btn-load-from-gist").on("click", function () {

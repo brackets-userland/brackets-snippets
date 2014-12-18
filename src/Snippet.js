@@ -14,6 +14,7 @@ define(function (require, exports, module) {
         this.name     = null;
         this.template = null;
         this.fullPath = null;
+        this.meta     = {};
     }
 
     // loads the snippet from the disk
@@ -34,18 +35,7 @@ define(function (require, exports, module) {
                 var s = new Snippet();
                 s.name = file.name;
                 s.fullPath = fullPath;
-                s.meta = {};
-
-                // extract meta from content
-                var lines = content.split("\n");
-                while (lines.length > 0 && lines[0].match(/^##/)) {
-                    var m = lines.shift().match(/^##([a-zA-Z0-9]+)\s*:(.*)/);
-                    if (m) {
-                        s.meta[m[1]] = m[2].trim();
-                    }
-                }
-                s.template = lines.join("\n");
-
+                s.parseFileContent(content);
                 resolve(s);
 
             });
@@ -239,7 +229,19 @@ define(function (require, exports, module) {
         return clone;
     };
 
-    Snippet.prototype.getFileContent = function () {
+    Snippet.prototype.parseFileContent = function (content) {
+        // extract meta from content
+        var lines = content.split("\n");
+        while (lines.length > 0 && lines[0].match(/^##/)) {
+            var m = lines.shift().match(/^##([a-zA-Z0-9]+)\s*:(.*)/);
+            if (m) {
+                this.meta[m[1]] = m[2].trim();
+            }
+        }
+        this.template = lines.join("\n");
+    };
+
+    Snippet.prototype.createFileContent = function () {
         var sb = [];
         Object.keys(this.meta).forEach(function (key) {
             sb.push("##" + key + ": " + this.meta[key]);
