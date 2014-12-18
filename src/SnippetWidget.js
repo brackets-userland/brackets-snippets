@@ -408,7 +408,15 @@ define(function (require, exports) {
             });
 
             var $temp = $("<div>");
-            var lang = LanguageManager.getLanguageForPath(this.hostEditor.document.file.fullPath);
+
+            var lang;
+            if (this.selectedSnippet.meta.lang) {
+                lang = LanguageManager.getLanguageForExtension(this.selectedSnippet.meta.lang);
+            }
+            if (!lang) {
+                lang = LanguageManager.getLanguageForPath(this.hostEditor.document.file.fullPath);
+            }
+
             CodeMirror.runMode(template, lang.getMode(), $temp[0]);
             var html = $temp.html();
 

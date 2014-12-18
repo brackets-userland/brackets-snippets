@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0 (18/12/2014)
+* Implemented metadata support for snippets, add `##key: value` to the beggining of the snippet file to provide metadata.
+* Implemented metadata key `lang` which should be an extension of language desired for syntax highlighting e.g. `##lang: js`
+* Fixed a case when inserting a snippet inside html tags.
+
 ## 0.3.1 (10/12/2014)
 * Fixed CodeMirror breaking snippet variables.
 * Fixed a case when invalid snippet was executed from a current line.

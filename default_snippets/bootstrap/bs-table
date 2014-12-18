@@ -1,3 +1,4 @@
+##lang: html
 <table class="table table-bordered table-striped table-hover table-condensed">
   {{!cursor}}
 </table>

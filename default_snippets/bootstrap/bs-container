@@ -1,3 +1,4 @@
+##lang: html
 <div class="container">
   {{!cursor}}
 </div>
