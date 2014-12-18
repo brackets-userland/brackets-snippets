@@ -2,8 +2,7 @@ define(function (require, exports) {
     "use strict";
 
     // Brackets modules
-    var _       = brackets.getModule("thirdparty/lodash"),
-        Dialogs = brackets.getModule("widgets/Dialogs");
+    var Dialogs = brackets.getModule("widgets/Dialogs");
 
     // Local modules
     var Gist          = require("src/Gist"),
@@ -34,7 +33,7 @@ define(function (require, exports) {
         }
 
         if (snippet.template) {
-            $snippetEditor.val(snippet.template);
+            $snippetEditor.val(snippet.getFileContent());
         }
 
         $snippetName.on("keyup change", function () {
@@ -98,7 +97,7 @@ define(function (require, exports) {
         onSuccessBeforeClose  = _onSuccessBeforeClose;
 
         if (typeof _snippet === "object") {
-            snippet = _.cloneDeep(_snippet);
+            snippet = _snippet.clone();
         } else {
             snippet = {};
         }

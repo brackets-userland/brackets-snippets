@@ -2,7 +2,8 @@ define(function (require, exports, module) {
     "use strict";
 
     // Brackets modules
-    var FileSystem      = brackets.getModule("filesystem/FileSystem");
+    var _          = brackets.getModule("thirdparty/lodash"),
+        FileSystem = brackets.getModule("filesystem/FileSystem");
 
     // Local modules
     var ErrorHandler = require("src/ErrorHandler"),
@@ -228,6 +229,23 @@ define(function (require, exports, module) {
             });
 
         });
+    };
+
+    Snippet.prototype.clone = function () {
+        var clone = new Snippet();
+        Object.keys(this).forEach(function (key) {
+            clone[key] = _.cloneDeep(this[key]);
+        }, this);
+        return clone;
+    };
+
+    Snippet.prototype.getFileContent = function () {
+        var sb = [];
+        Object.keys(this.meta).forEach(function (key) {
+            sb.push("##" + key + ": " + this.meta[key]);
+        }, this);
+        sb.push(this.template);
+        return sb.join("\n");
     };
 
     module.exports = Snippet;
