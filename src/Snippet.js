@@ -2,13 +2,16 @@ define(function (require, exports, module) {
     "use strict";
 
     // Brackets modules
-    var _          = brackets.getModule("thirdparty/lodash"),
-        FileSystem = brackets.getModule("filesystem/FileSystem");
+    var _                 = brackets.getModule("thirdparty/lodash"),
+        CommandManager    = brackets.getModule("command/CommandManager"),
+        FileSystem        = brackets.getModule("filesystem/FileSystem"),
+        KeyBindingManager = brackets.getModule("command/KeyBindingManager");
 
     // Local modules
     var ErrorHandler = require("src/ErrorHandler"),
-        Preferences = require("src/Preferences"),
-        Promise     = require("bluebird");
+        EventEmitter = require("src/EventEmitter"),
+        Preferences  = require("src/Preferences"),
+        Promise      = require("bluebird");
 
     function Snippet() {
         this.name     = null;
@@ -233,6 +236,7 @@ define(function (require, exports, module) {
             }
         }
         this.template = lines.join("\n");
+        this._processMetaData();
     };
 
     Snippet.prototype.createFileContent = function () {
@@ -242,6 +246,21 @@ define(function (require, exports, module) {
         }, this);
         sb.push(this.template);
         return sb.join("\n");
+    };
+
+    Snippet.prototype._processMetaData = function () {
+        if (this.meta.keyBinding) {
+            var self          = this,
+                keyBinding    = this.meta.keyBinding,
+                commandName   = "Trigger snippet '" + this.name + "'",
+                commandString = "snippets.triggerSnippet." + this.name + "." + keyBinding.replace(/[^a-zA-Z0-9]/g, "");
+
+            CommandManager.register(commandName, commandString, function () {
+                EventEmitter.emit("TRIGGER_SNIPPET", self);
+            });
+
+            KeyBindingManager.addBinding(commandString, keyBinding);
+        }
     };
 
     module.exports = Snippet;

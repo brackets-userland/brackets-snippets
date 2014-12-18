@@ -12,6 +12,7 @@ define(function (require, exports) {
 
     // Local modules
     var ErrorHandler    = require("src/ErrorHandler"),
+        EventEmitter    = require("src/EventEmitter"),
         Preferences     = require("src/Preferences"),
         SettingsDialog  = require("src/SettingsDialog"),
         Snippet         = require("src/Snippet"),
@@ -698,7 +699,11 @@ define(function (require, exports) {
         }
     };
 
-    function triggerWidget() {
+    function triggerWidget(snippetToTrigger) {
+        if (!(snippetToTrigger instanceof Snippet)) {
+            snippetToTrigger = null;
+        }
+
         var activeEditor          = EditorManager.getActiveEditor(),
             sWidget               = new SnippetWidget(activeEditor, activeEditor.getCursorPos()),
             exactMatches          = [],
@@ -810,6 +815,10 @@ define(function (require, exports) {
     function init() {
         bindShortcut();
     }
+
+    EventEmitter.on("TRIGGER_SNIPPET", function (snippet) {
+        triggerWidget(snippet);
+    });
 
     exports.init = init;
 
