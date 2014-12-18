@@ -1,5 +1,4 @@
 ##lang: js
-##keyBinding: alt-1
 function {{$1:functionName}}() {
     {{!cursor}}
 }
