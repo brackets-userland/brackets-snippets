@@ -43,16 +43,25 @@ define(function (require, exports, module) {
         });
     };
 
-    // creates new snippet file on the disk
-    Snippet.create = function (name, template) {
+    // saves the snippet to the disk (create or update)
+    Snippet.prototype.save = function () {
         return new Promise(function (resolve, reject) {
 
-            var fullPath = Preferences.get("defaultSnippetDirectory") + name;
-            FileSystem.resolve(fullPath, function (err) {
+            var creating = false,
+                updating = false;
+
+            if (this.fullPath === null) {
+                creating = true;
+                this.fullPath = Preferences.get("defaultSnippetDirectory") + this.name;
+            } else {
+                updating = true;
+            }
+
+            FileSystem.resolve(this.fullPath, function (err) {
 
                 // NotFound is desired here, because we should be writing new file to disk
-                if (err === "NotFound") {
-                    FileSystem.getFileForPath(fullPath).write(template, function (err) {
+                if (creating && err === "NotFound") {
+                    FileSystem.getFileForPath(this.fullPath).write(this.createFileContent(), function (err) {
 
                         // error writing the file to disk
                         if (err) {
@@ -62,11 +71,7 @@ define(function (require, exports, module) {
                         }
 
                         // successfully saved new snippet to disk
-                        var s = new Snippet();
-                        s.name = name;
-                        s.template = template;
-                        s.fullPath = fullPath;
-                        resolve(s);
+                        resolve(this);
 
                     });
                     return;
@@ -80,12 +85,12 @@ define(function (require, exports, module) {
                 }
 
                 // no error resolving the file, it already exists
-                ErrorHandler.show("File already exists: " + fullPath);
+                ErrorHandler.show("File already exists: " + this.fullPath);
                 reject();
 
-            });
+            }.bind(this));
 
-        });
+        }.bind(this));
     };
 
     Snippet.prototype.rename = function (newName) {

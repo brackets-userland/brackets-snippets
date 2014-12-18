@@ -107,10 +107,10 @@ define(function (require, exports, module) {
     }
 
     function addNewSnippetDialog(snippet) {
-        return SnippetDialog.show(snippet, function (obj) {
+        return SnippetDialog.show(snippet, function (newSnippet) {
             // dialog should only be closed, if this promise is resolved
-            return Snippet.create(obj.name, obj.template).then(function (snippet) {
-                SnippetCollection.push(snippet);
+            return newSnippet.save().then(function () {
+                SnippetCollection.push(newSnippet);
             });
         });
     }
