@@ -36,8 +36,8 @@
         "grunt-contrib-jshint": "latest",
         "grunt-jslint": "latest",
         "grunt-lesslint": "latest",
-        "grunt-jscs-checker": "latest",
-        "grunt-contrib-compress": "latest",
+        "grunt-jscs": "latest",
+        "grunt-zip": "latest",
         "grunt-lineending": "latest"
     },
 

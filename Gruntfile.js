@@ -45,19 +45,17 @@ module.exports = function (grunt) {
                 config: ".jscs.json"
             }
         },
-        compress: {
+        zip: {
             main: {
-                options: {
-                    archive: "brackets-snippets.zip"
-                },
-                files: [
-                    { src: ["nls/**"], dest: "/" },
-                    { src: ["shell/**"], dest: "/" },
-                    { src: ["src/**"], dest: "/" },
-                    { src: ["styles/**"], dest: "/" },
-                    { src: ["templates/**"], dest: "/" },
-                    { src: ["thirdparty/**"], dest: "/" },
-                    { src: ["LICENSE", "*.js", "*.json", "*.md"], dest: "/", filter: "isFile" }
+                dest: "brackets-snippets.zip",
+                src: [
+                    "default_snippets/**",
+                    "nls/**",
+                    "src/**",
+                    "styles/**",
+                    "templates/**",
+                    "thirdparty/**",
+                    "LICENSE", "*.js", "*.json", "*.md"
                 ]
             }
         },
@@ -87,11 +85,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-jslint");
     grunt.loadNpmTasks("grunt-contrib-jshint");
     grunt.loadNpmTasks("grunt-lesslint");
-    grunt.loadNpmTasks("grunt-jscs-checker");
-    grunt.loadNpmTasks("grunt-contrib-compress");
+    grunt.loadNpmTasks("grunt-jscs");
+    grunt.loadNpmTasks("grunt-zip");
     grunt.loadNpmTasks("grunt-lineending");
 
-    grunt.registerTask("package", ["lineending", "compress"]);
+    grunt.registerTask("package", ["lineending", "zip"]);
     grunt.registerTask("jslint-test", ["jslint"]);
     grunt.registerTask("jshint-test", ["jshint"]);
     grunt.registerTask("less-test", ["lesslint"]);
