@@ -1,0 +1,13 @@
+##lang: html
+<div class="button-bar">
+    <ul class="button-group">
+        <li><a href="#" class="button">Button 1</a></li>
+        <li><a href="#" class="button">Button 2</a></li>
+        <li><a href="#" class="button">Button 3</a></li>
+    </ul>
+    <ul class="button-group">
+        <li><a href="#" class="button">Button 1</a></li>
+        <li><a href="#" class="button">Button 2</a></li>
+        <li><a href="#" class="button">Button 3</a></li>
+    </ul>
+</div>

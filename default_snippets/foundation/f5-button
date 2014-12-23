@@ -1,0 +1,6 @@
+##lang: html
+<!-- Size Classes: [tiny small large] -->
+<!-- Radius Classes: [radius round] -->
+<!-- Color Classes: [secondary success alert] -->
+<!-- Disabled Class: disabled -->
+<a href="#" class="button">Default Button</a>
