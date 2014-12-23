@@ -1,0 +1,6 @@
+##lang: html
+<!-- Optional Classes: [callout radius] -->
+<div class="panel">
+    <h5>This is a callout panel.</h5>
+    <p>It's a little ostentatious, but useful for important content.</p>
+</div>
