@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.0 (???)
+* French translation by [Yoan](https://github.com/MAYdev)
+* Foundation snippets by [Stéphane](https://github.com/LeG3nDz)
+
 ## 0.4.0 (18/12/2014)
 * Implemented metadata support for snippets, add `##key: value` to the beggining of the snippet file to provide metadata.
 * Implemented metadata key `lang` which should be an extension of language desired for syntax highlighting e.g. `##lang: js`
