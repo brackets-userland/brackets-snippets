@@ -9,6 +9,7 @@ define(function (require, exports, module) {
     // Localization is provided via the i18n plugin.
     // All other bundles for languages need to add a prefix to the exports below so i18n can find them.
     module.exports = {
-        root: true
+        root: true,
+        "fr": true
     };
 });
