@@ -25,7 +25,8 @@ define(function (require, exports) {
         CODEFONT_BORDER_IN_PX = 2,
         CODEFONT_WIDTH_IN_PX  = 8.4,
         SELECTED_MARK         = "{{!selected}}",
-        CURSOR_MARK           = "{{!cursor}}";
+        CURSOR_MARK           = "{{!cursor}}",
+        VARIABLE_REGEXP       = /\{\{\$([0-9]+)(\??)\:([a-zA-Z0-9]+)/;
 
     // Templates
     var snippetWidgetTemplate     = require("text!templates/SnippetWidget.html"),
@@ -361,10 +362,11 @@ define(function (require, exports) {
     SnippetWidget.prototype.getVariablesFromTemplate = function (template) {
         var m = template.match(/\{\{\$[^\}]+\}\}/g);
         return m ? m.map(function (str) {
-            var v = str.match(/\{\{\$([0-9]+)\:([a-zA-Z0-9]+)/);
+            var v = str.match(VARIABLE_REGEXP);
             return {
                 num: v[1],
-                name: v[2],
+                optional: v[2] === "?",
+                name: v[3],
                 str: str
             };
         }) : [];
@@ -437,6 +439,7 @@ define(function (require, exports) {
                 var w = CODEFONT_BORDER_IN_PX + variable.name.length * CODEFONT_WIDTH_IN_PX;
                 var inputHtml = "<input class='variable' type='text'" +
                                 " x-var-num='" + variable.num + "'" +
+                                " x-var-optional='" + variable.optional.toString() + "'" +
                                 " placeholder='" + variable.name + "'" +
                                 " style='width:" + w + "px;' />";
                 currentHtml = currentHtml.replace(variable.str, inputHtml);
@@ -481,6 +484,9 @@ define(function (require, exports) {
         var $inputs = this.$currentSnippetArea.find(":input");
         if ($inputs.length === 0) { return false; }
 
+        // filter out optional inputs
+        $inputs = $inputs.filter(function () { return $(this).attr("x-var-optional") !== "true"; });
+
         // find first empty input and focus there
         for (var i = 0; i < $inputs.length; i++) {
             var $input = $($inputs[i]);
@@ -502,7 +508,7 @@ define(function (require, exports) {
 
         variables.forEach(function (variable) {
 
-            var m = variable.match(/\{\{\$([0-9]+)\:([a-zA-Z0-9]+)/),
+            var m = variable.match(VARIABLE_REGEXP),
                 num = m[1],
                 $input = this.$currentSnippetArea.find("[x-var-num='" + num + "']");
 
