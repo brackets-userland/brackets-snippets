@@ -814,7 +814,22 @@ define(function (require, exports) {
     function bindShortcut() {
         var TRIGGER_SNIPPET_CMD = "snippets.triggerWidget";
         CommandManager
-            .register(Strings.TRIGGER_SNIPPET_MENU_ENTRY, TRIGGER_SNIPPET_CMD, triggerWidget);
+            .register(Strings.TRIGGER_SNIPPET_MENU_ENTRY, TRIGGER_SNIPPET_CMD, function () {
+
+                // if widget is currently open on this document, just close it
+                var currentWidgetsWithFocus = EditorManager
+                    .getActiveEditor()
+                    .getInlineWidgets()
+                    .filter(function (w) { return w instanceof SnippetWidget &&
+                                                  w.$htmlContent.find(":focus").length > 0; });
+
+                if (currentWidgetsWithFocus.length > 0) {
+                    currentWidgetsWithFocus.forEach(function (w) { w.close(); });
+                    return;
+                }
+
+                triggerWidget();
+            });
         Menus
             .getMenu(Menus.AppMenuBar.EDIT_MENU)
             .addMenuItem(TRIGGER_SNIPPET_CMD, Preferences.get("triggerSnippetShortcut"));
