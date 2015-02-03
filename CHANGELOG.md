@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0 (???)
+## 0.5.0 (03/02/2015)
 * French translation by [Yoan](https://github.com/MAYdev)
 * Foundation snippets by [Stéphane](https://github.com/LeG3nDz)
 * Fixed an issue where snippet directory was deleted from the disk or cannot be reached anymore.
