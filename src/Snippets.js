@@ -138,12 +138,15 @@ define(function (require, exports, module) {
 
             FileSystem.resolve(snippetDirectory.fullPath, function (err, directory) {
 
+                var notFound = err === "NotFound";
+                if (notFound) { err = null; }
+
                 if (err) {
                     ErrorHandler.show(err);
                     return;
                 }
 
-                if (directory.isDirectory !== true) {
+                if (notFound || directory.isDirectory !== true) {
                     snippetDirectory.autoLoad = false;
                     Preferences.set("snippetDirectories", snippetDirectories);
                     ErrorHandler.show("_loadSnippetsFromDirectories: " + snippetDirectory.fullPath + " is not a directory!");
