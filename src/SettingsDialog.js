@@ -4,6 +4,8 @@ define(function (require, exports) {
     // Brackets modules
     var _               = brackets.getModule("thirdparty/lodash"),
         Dialogs         = brackets.getModule("widgets/Dialogs"),
+        FileSystem      = brackets.getModule("filesystem/FileSystem"),
+        FileUtils       = brackets.getModule("file/FileUtils"),
         NativeApp       = brackets.getModule("utils/NativeApp");
 
     // Local modules
@@ -159,6 +161,16 @@ define(function (require, exports) {
         $dialog.on("click", ".btn-add-snippet-directory", function () {
             Utils.askQuestion(Strings.SNIPPET_DIRECTORY_ADD, Strings.SPECIFY_DIRECTORY_FULLPATH, "string")
                 .then(function (fullPath) {
+
+                    // normalize fullPath when on Windows
+                    fullPath = FileUtils.convertWindowsPathToUnixPath(fullPath);
+
+                    // check if it's a valid fullPath
+                    if (!FileSystem.isAbsolutePath(fullPath)) {
+                        ErrorHandler.show(fullPath + " is not a directory absolute path!");
+                        return;
+                    }
+
                     var snippetDirectories = Preferences.get("snippetDirectories");
                     snippetDirectories.push({
                         fullPath: fullPath,

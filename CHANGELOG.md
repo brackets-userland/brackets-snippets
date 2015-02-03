@@ -3,6 +3,7 @@
 ## 0.5.0 (???)
 * French translation by [Yoan](https://github.com/MAYdev)
 * Foundation snippets by [Stéphane](https://github.com/LeG3nDz)
+* Fixed an issue where snippet directory was deleted from the disk or cannot be reached anymore.
 
 ## 0.4.0 (18/12/2014)
 * Implemented metadata support for snippets, add `##key: value` to the beggining of the snippet file to provide metadata.
