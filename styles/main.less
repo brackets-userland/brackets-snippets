@@ -1,11 +1,16 @@
 @import "_mixins.less";
 
-@borderColor: #b2b5b5;
-@white: #ffffff;
-@selectedEntry: #e0f0fa;
-@codeEditorBackground: #f8f8f8;
 @colorError: #d9534f;
 @textColor: #535353;
+@textColorDark: #b2b5b5;
+@lightTextColor: #b2b5b5;
+@lightTextColorDark: #535353;
+@borderColor: #b2b5b5;
+@borderColorDark: #535353;
+@snippetEntryBackground: #ffffff;
+@snippetEntryBackgroundDark: #1b1b1b;
+@snippetEntrySelected: #e0f0fa;
+@snippetEntrySelectedDark: rgb(40, 65, 96);
 
 .brackets-snippets-widget {
     position: absolute;
@@ -34,7 +39,7 @@
         flex-direction: column;
 
         .snippet-search-container {
-            margin-bottom: 1em;
+            flex-shrink: 0;
         }
 
         .snippets-list {
@@ -42,21 +47,27 @@
             position: relative;
             overflow-x: hidden;
             overflow-y: scroll;
+
             border: 1px solid @borderColor;
+            .dark & {
+                border-color: @borderColorDark;
+            }
 
             &.is-empty {
                 border: none;
                 overflow: auto;
             }
 
-            .dark & {
-                border: 1px solid @white;
-            }
-
             .snippet-entry {
-                background-color: @white;
+                background-color: @snippetEntryBackground;
+                .dark & {
+                    background-color: @snippetEntryBackgroundDark;
+                }
                 &.selected {
-                    background-color: @selectedEntry;
+                    background-color: @snippetEntrySelected;
+                    .dark & {
+                        background-color: @snippetEntrySelectedDark;
+                    }
                 }
             }
         }
@@ -82,16 +93,22 @@
             .snippet-header {
                 flex-shrink: 0;
                 margin-bottom: 0.2em;
-                color: @borderColor;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
 
                 .snippet-name {
                     color: @textColor;
+                    .dark & {
+                        color: @textColorDark;
+                    }
                 }
 
                 .snippet-path {
+                    color: @lightTextColor;
+                    .dark & {
+                        color: @lightTextColorDark;
+                    }
                     &::before {
                         content: "(";
                     }
@@ -104,7 +121,10 @@
             .snippet-meta {
                 flex-shrink: 0;
                 margin-bottom: 0.2em;
-                color: @borderColor;
+                color: @lightTextColor;
+                .dark & {
+                    color: @lightTextColorDark;
+                }
             }
 
             .snippet-content {
@@ -114,15 +134,19 @@
 
                 &.can-scroll-top {
                     border-top: 1px solid @borderColor;
+                    .dark & {
+                        border-top-color: @borderColorDark;
+                    }
                 }
 
                 &.can-scroll-bottom {
                     border-bottom: 1px solid @borderColor;
+                    .dark & {
+                        border-bottom-color: @borderColorDark;
+                    }
                 }
 
                 pre {
-                    // background-color: @codeEditorBackground;
-                    // border: 1px solid @borderColor;
                     padding-top: 2px;
                     padding-bottom: 2px;
 
