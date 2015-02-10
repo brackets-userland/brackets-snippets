@@ -1,0 +1,4 @@
+##lang: php
+{{$1:privacy}} function {{$2:funcName}}({{!cursor}}) {
+
+}

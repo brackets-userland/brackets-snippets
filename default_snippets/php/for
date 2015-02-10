@@ -1,0 +1,4 @@
+##lang: php
+for ($i = 0; $i < count({{$1:array}}); $i++) {
+    {{!cursor}}
+}

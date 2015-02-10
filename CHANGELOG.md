@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+### Added
+- Support of multiple snippets with the same name for different languages. See `default_snippets` for js and php.
 
 ## 0.5.0 - 2015-02-03
 ### Added

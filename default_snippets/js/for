@@ -1,0 +1,4 @@
+##lang: js
+for (let i = 0; i < {{$1:array}}.length; i++) {
+    {{!cursor}}
+}

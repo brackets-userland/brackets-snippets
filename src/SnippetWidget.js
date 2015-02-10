@@ -275,13 +275,12 @@ define(function (require, exports) {
         if (force || query !== this.lastQuery || typeof this.lastQuery !== "string") {
             this.lastQuery = query;
 
+            this.snippets = Snippets.search(query, this.hostEditor.document.file.fullPath);
             if (this.detachedMode) {
                 var lookingFor = this.$searchInput.val();
-                this.snippets = [_.find(Snippets.getAll(), function (snippet) {
+                this.snippets = [_.find(this.snippets, function (snippet) {
                     return snippet.name === lookingFor;
                 })];
-            } else {
-                this.snippets = Snippets.search(query);
             }
 
             this.$snippetsList.html(Mustache.render(snippetWidgetListTemplate, {
@@ -740,7 +739,7 @@ define(function (require, exports) {
 
             params.forEach(function (param, index) {
                 var possibleVariables = params.slice(index + 1),
-                    results           = Snippets.search(param);
+                    results           = Snippets.search(param, activeEditor.document.file.fullPath);
 
                 if (results.length === 0) {
                     return;

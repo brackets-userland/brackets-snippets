@@ -4,7 +4,8 @@ define(function (require, exports, module) {
     // Brackets modules
     var _               = brackets.getModule("thirdparty/lodash"),
         ExtensionUtils  = brackets.getModule("utils/ExtensionUtils"),
-        FileSystem      = brackets.getModule("filesystem/FileSystem");
+        FileSystem      = brackets.getModule("filesystem/FileSystem"),
+        FileUtils       = brackets.getModule("file/FileUtils");
 
     // Local modules
     var ErrorHandler  = require("src/ErrorHandler"),
@@ -44,14 +45,29 @@ define(function (require, exports, module) {
         return SnippetCollection;
     }
 
-    function search(query) {
+    function search(query, fileContext) {
+        var result;
+
         if (!query) {
-            return getAll();
+            result = getAll();
+        } else {
+            var regExp = new RegExp(escapeRegExp(query), "i");
+            result = _.filter(SnippetCollection, function (snippet) {
+                return regExp.test(snippet.name);
+            });
         }
-        var regExp = new RegExp(escapeRegExp(query), "i");
-        return _.filter(SnippetCollection, function (snippet) {
-            return regExp.test(snippet.name);
-        });
+
+        if (fileContext) {
+            // filter snippets by language of the context file
+            var currentFileExtension = FileUtils.getSmartFileExtension(fileContext);
+            result = _.filter(result, function (snippet) {
+                return snippet.meta && snippet.meta.lang &&
+                    snippet.meta.lang === currentFileExtension ||
+                    snippet.meta.lang.indexOf(currentFileExtension) !== -1;
+            });
+        }
+
+        return result;
     }
 
     function addToCollection(snippet) {
