@@ -61,9 +61,13 @@ define(function (require, exports, module) {
             // filter snippets by language of the context file
             var currentFileExtension = FileUtils.getSmartFileExtension(fileContext);
             result = _.filter(result, function (snippet) {
-                return snippet.meta && snippet.meta.lang &&
-                    snippet.meta.lang === currentFileExtension ||
-                    snippet.meta.lang.indexOf(currentFileExtension) !== -1;
+                var noLang = !snippet.meta || !snippet.meta.lang;
+                var hasLang = snippet.meta && snippet.meta.lang;
+                var langMatchesFile = hasLang && (
+                                          snippet.meta.lang === currentFileExtension ||
+                                          snippet.meta.lang.indexOf(currentFileExtension) !== -1
+                                      );
+                return noLang || langMatchesFile;
             });
         }
 
