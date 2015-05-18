@@ -1,3 +1,7 @@
+#warn
+
+**this extension is not actively maintained or developed, feel free to fork it or steal ideas from it**
+
 #brackets-snippets [![build status](https://travis-ci.org/zaggino/brackets-snippets.svg?branch=master)](https://travis-ci.org/zaggino/brackets-snippets)
 
 Snippets extension for Brackets
